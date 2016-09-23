@@ -1,0 +1,32 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../../../bower_components/iron-pages/iron-pages.html">
+
+<dom-module id="content-pages">
+    <template>
+        <link rel="stylesheet" href="../../css/content-pages.css">
+        <main>
+            <app-location route="{{route}}" use-hash-as-path></app-location>
+            <app-route
+                route="{{route}}"
+                pattern="/:page"
+                data="{{data}}"
+                tail="{{tail}}"></app-route>
+
+            <iron-pages selected="{{data.page}}" attr-for-selected="data-page">
+                <section data-page="">
+                    <h2>home</h2>
+                </section>
+                <section data-page="about">
+                    <h2>about</h2>
+                </section>
+            </iron-pages>
+        </main>
+
+    </template>
+    <script>
+        Polymer({
+            is: "content-pages"
+        });
+    </script>
+</dom-module>

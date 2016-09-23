@@ -1,9 +1,26 @@
 <link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../../../bower_components/app-route/app-route.html">
 
 <dom-module id="my-header">
     <template>
         <link rel="stylesheet" href="../../css/my-header.css">
-        <h1>ok mkey</h1>
+        <header>
+            <h1>Al otro lado de la página</h1>
+        </header>
+        <nav>
+            <app-location route="{{route}}"></app-location>
+            <app-route
+                route="{{route}}"
+                pattern="/:page"
+                data="{{data}}"
+                tail="{{tail}}"></app-route>
+
+            <iron-selector selected="{{data.page}}" attr-for-selected="data-page">
+                <a data-page="" href="#/">Home</a>
+                <a data-page="about" href="#/about">About</a>
+            </iron-selector>
+        </nav>
     </template>
     <script>
         Polymer({

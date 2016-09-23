@@ -14,5 +14,11 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "app-route": "PolymerElements/app-route#^0.9.0",
+    "iron-location": "PolymerElements/iron-location#^0.8.0",
+    "iron-pages": "PolymerElements/iron-pages#^1.0.0",
+    "iron-selector": "PolymerElements/iron-selector#^1.0.0"
+  }
 }
