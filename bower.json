@@ -1,0 +1,18 @@
+{
+  "name": "alotroladodelapagina",
+  "description": "Página personal",
+  "main": "app/backend/server.js",
+  "authors": [
+    "Pablo-Rodriguez <pablorp1996@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Pablo-Rodriguez/alotroladodelapagina",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
