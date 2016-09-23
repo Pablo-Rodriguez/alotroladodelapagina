@@ -1,0 +1,19 @@
+{
+  "name": "alotroladodelapagina",
+  "version": "1.0.0",
+  "description": "Página personal",
+  "main": "app/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pablo-Rodriguez/alotroladodelapagina.git"
+  },
+  "author": "Pablo-Rodriguez <pablorp1996@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Pablo-Rodriguez/alotroladodelapagina/issues"
+  },
+  "homepage": "https://github.com/Pablo-Rodriguez/alotroladodelapagina#readme"
+}
