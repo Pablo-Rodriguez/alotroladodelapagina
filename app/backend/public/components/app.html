@@ -8147,7 +8147,19 @@ this._children = Polymer.TreeApi.arrayCopyChildNodes(this.root);
 this._insertChildren();
 this.fire('dom-change');
 }
-});</script><script>
+});</script><dom-module id=home-section assetpath="sections/"><template><style>
+:host{display:block}
+</style><section><h2>Home</h2></section></template><script>
+        Polymer({
+            is: 'home-section'
+        });
+    </script></dom-module><dom-module id=about-section assetpath="sections/"><template><style>
+:host{display:block}
+</style><section><h2>About</h2></section></template><script>
+        Polymer({
+            is: 'about-section'
+        });
+    </script></dom-module><script>
   (function() {
     'use strict';
 
@@ -9037,7 +9049,7 @@ this.fire('dom-change');
     }
   });
 </script><dom-module id=my-header assetpath="ui/"><template><style>
-:host{display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-lines:multiple;-moz-box-lines:multiple;-o-box-lines:multiple;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;-webkit-box-align:stretch;-moz-box-align:stretch;-o-box-align:stretch;-ms-flex-align:stretch;-webkit-align-items:stretch;align-items:stretch;background-color:var(--primary-color);}:host header{-webkit-box-flex:4;-moz-box-flex:4;-o-box-flex:4;box-flex:4;-webkit-flex:4 4 70%;-ms-flex:4 4 70%;flex:4 4 70%;overflow:hidden;}:host header h1{font-size:26px;margin:.75em auto;color:var(--light-color);margin-left:1em}:host nav{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1 1 30%;-ms-flex:1 1 30%;flex:1 1 30%;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:stretch;-moz-box-align:stretch;-o-box-align:stretch;-ms-flex-align:stretch;-webkit-align-items:stretch;align-items:stretch;}:host nav iron-selector{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:stretch;-moz-box-align:stretch;-o-box-align:stretch;-ms-flex-align:stretch;-webkit-align-items:stretch;align-items:stretch;}:host nav iron-selector a{padding:0 1em;-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;text-align:center;color:var(--light-color);font-weight:bold;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:center;-moz-box-align:center;-o-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;}:host nav iron-selector a:hover{background-color:var(--secondary-color)}:host nav iron-selector a span{display:block;width:100%}@media screen and (max-width:521px){:host header h1{text-align:center;margin-left:0}:host nav iron-selector{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;}:host nav iron-selector a{padding:1em;-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;}:host nav iron-selector a span{display:block}}
+:host{display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-lines:multiple;-moz-box-lines:multiple;-o-box-lines:multiple;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;-webkit-box-align:stretch;-moz-box-align:stretch;-o-box-align:stretch;-ms-flex-align:stretch;-webkit-align-items:stretch;align-items:stretch;background-color:var(--primary-color);}:host header{-webkit-box-flex:4;-moz-box-flex:4;-o-box-flex:4;box-flex:4;-webkit-flex:4 4 70%;-ms-flex:4 4 70%;flex:4 4 70%;overflow:hidden;}:host header h1{font-size:26px;margin:.75em auto;color:var(--light-color);margin-left:1em}:host nav{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1 1 30%;-ms-flex:1 1 30%;flex:1 1 30%;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:stretch;-moz-box-align:stretch;-o-box-align:stretch;-ms-flex-align:stretch;-webkit-align-items:stretch;align-items:stretch;}:host nav iron-selector{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:stretch;-moz-box-align:stretch;-o-box-align:stretch;-ms-flex-align:stretch;-webkit-align-items:stretch;align-items:stretch;}:host nav iron-selector a{padding:0 1em;-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;text-align:center;color:var(--light-color);font-weight:bold;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:center;-moz-box-align:center;-o-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;}:host nav iron-selector a:hover{background-color:var(--secondary-color)}:host nav iron-selector a span{display:block;width:100%}@media screen and (max-width:375px){:host header{-webkit-flex-basis:100%;flex-basis:100%;}:host header h1{text-align:center;font-size:20px;margin:.6em auto}:host nav iron-selector{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;}:host nav iron-selector a{font-size:14px;padding:.8em;-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;}:host nav iron-selector a span{display:block}}@media screen and (max-width:600px) and (min-width:376px){:host header{-webkit-flex-basis:100%;flex-basis:100%;}:host header h1{text-align:center;margin-left:0}:host nav iron-selector{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;}:host nav iron-selector a{padding:1em;-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;}:host nav iron-selector a span{display:block}}
 </style><header><h1 class=title-font>Al otro lado de la página</h1></header><nav><app-location route={{route}}></app-location><app-route route={{route}} pattern=/:page data={{data}} tail={{tail}}></app-route><iron-selector selected={{data.page}} attr-for-selected=data-page><a data-page href="#/"><span>Home</span></a><a data-page=about href=#/about><span>About</span></a></iron-selector><a data-page=about href=#/about></a></nav><a data-page=about href=#/about></a></template><script>
         Polymer({
             is: 'my-header'
@@ -9744,9 +9756,18 @@ this.fire('dom-change');
 
   </script></dom-module><dom-module id=content-pages assetpath="ui/"><template><style>
 :host{display:block}
-</style><main><app-location route={{route}} use-hash-as-path></app-location><app-route route={{route}} pattern=/:page data={{data}} tail={{tail}}></app-route><iron-pages selected={{data.page}} attr-for-selected=data-page><section data-page><h2>home</h2></section><section data-page=about><h2>about</h2></section></iron-pages></main></template><script>
+</style><main><app-location route={{route}} use-hash-as-path></app-location><app-route route={{route}} pattern=/:page data={{data}} tail={{tail}}></app-route><iron-pages selected={{page}} attr-for-selected=data-page><home-section data-page></home-section><about-section data-page=about></about-section></iron-pages></main></template><script>
         Polymer({
-            is: "content-pages"
+            is: "content-pages",
+            properties: {
+                page: {
+                    type: String,
+                    computed: '_computePage(data)'
+                }
+            },
+            _computePage: function (data) {
+                return typeof data.page !== 'undefined' ? data.page : '';
+            }
         });
     </script></dom-module><style is=custom-style>
 

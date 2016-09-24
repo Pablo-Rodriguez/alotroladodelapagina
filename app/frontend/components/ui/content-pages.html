@@ -1,6 +1,8 @@
 <link rel="import" href="../../../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../sections/home-section.html">
+<link rel="import" href="../sections/about-section.html">
 
 <dom-module id="content-pages">
     <template>
@@ -13,20 +15,25 @@
                 data="{{data}}"
                 tail="{{tail}}"></app-route>
 
-            <iron-pages selected="{{data.page}}" attr-for-selected="data-page">
-                <section data-page="">
-                    <h2>home</h2>
-                </section>
-                <section data-page="about">
-                    <h2>about</h2>
-                </section>
+            <iron-pages selected="{{page}}" attr-for-selected="data-page">
+                <home-section data-page=""></home-section>
+                <about-section data-page="about"></about-section>
             </iron-pages>
         </main>
 
     </template>
     <script>
         Polymer({
-            is: "content-pages"
+            is: "content-pages",
+            properties: {
+                page: {
+                    type: String,
+                    computed: '_computePage(data)'
+                }
+            },
+            _computePage: function (data) {
+                return typeof data.page !== 'undefined' ? data.page : '';
+            }
         });
     </script>
 </dom-module>
