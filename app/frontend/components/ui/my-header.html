@@ -6,7 +6,7 @@
     <template>
         <link rel="stylesheet" href="../../css/my-header.css">
         <header>
-            <h1>Al otro lado de la página</h1>
+            <h1 class="title-font">Al otro lado de la página</h1>
         </header>
         <nav>
             <app-location route="{{route}}"></app-location>
@@ -17,8 +17,8 @@
                 tail="{{tail}}"></app-route>
 
             <iron-selector selected="{{data.page}}" attr-for-selected="data-page">
-                <a data-page="" href="#/">Home</a>
-                <a data-page="about" href="#/about">About</a>
+                <a data-page="" href="#/"><span>Home</span</a>
+                <a data-page="about" href="#/about"><span>About</span</a>
             </iron-selector>
         </nav>
     </template>

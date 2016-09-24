@@ -1,6 +1,52 @@
 @import 'nib'
 
 :host
-    display block
-    h1
-        color red
+    display flex
+    flex-wrap wrap
+    align-items stretch
+    //padding 0 20px
+    background-color var(--primary-color)
+    header
+        flex 4 4 70%
+        overflow hidden
+        h1
+            font-size 26px
+            margin .75em auto
+            color var(--light-color)
+            margin-left 1em
+    nav
+        flex 1 1 30%
+        display flex
+        align-items stretch
+        iron-selector
+            flex 1
+            display flex
+            align-items stretch
+            a
+                padding 0 1em
+                flex 1
+                text-align center
+                color var(--light-color)
+                font-weight bold
+                display flex
+                align-items center
+                &:hover
+                    background-color var(--secondary-color)
+                span
+                    display block
+                    width 100%
+
+@media screen and (max-width: 521px)
+    :host
+        header
+            h1
+                text-align center
+                margin-left 0
+        nav
+            iron-selector
+                flex 1
+                a
+                    padding 1em
+                    flex 1
+                    span
+                        display block
