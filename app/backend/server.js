@@ -13,7 +13,7 @@ const app = new Rex(router);
 const server = http.createServer(router);
 
 const port = process.env.PORT || config.port;
-const db = 'mongodb://localhost/alotroladodelapagina';
+const db = process.env.MONGODB_URI || 'mongodb://localhost/alotroladodelapagina';
 
 app.setMiddlewares(middlewares);
 app.setControllers(controllers);
