@@ -6,7 +6,8 @@
   "scripts": {
     "start": "forever -c babel-node app/backend/server.js --presets es2015",
     "up": "nodemon --exec babel-node app/backend/server.js --presets es2015 --watch app/backend/ --ignore app/backend/public/",
-    "sync": "browser-sync start --proxy localhost:5000 --files \"app/backend/\""
+    "sync": "browser-sync start --proxy localhost:5000 --files \"app/backend/\"",
+    "push": "git push origin master && git push heroku master"
   },
   "repository": {
     "type": "git",
