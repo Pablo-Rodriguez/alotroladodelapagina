@@ -1,0 +1,50 @@
+@import 'nib'
+
+:host
+    display block
+    border 2px solid var(--dark-color)
+    background-color #fff
+    box-shadow 0 2px 3px rgba(0, 0, 0, 0.3)
+    border-radius 5px
+    overflow hidden
+    margin-bottom 1em
+    article
+        img
+            width 100%
+        #info
+            flex 1
+            padding 1em
+            display flex
+            flex-direction column
+            justify-content space-between
+            hgroup
+                *
+                    display inline
+                    margin-right .5em
+                h4
+                    a:hover
+                        cursor pointer
+                        text-decoration underline
+            #review
+                text-align justify
+
+@media screen and (min-width: 450px)
+    :host
+        article
+            display flex
+            img
+                width auto
+                flex-grow 0
+                flex-shrink 0
+            #info
+                flex 1
+                padding 1em
+                display flex
+                flex-direction column
+                justify-content space-between
+                hgroup
+                    *
+                        display inline
+                        margin-right .5em
+                #review
+                    text-align justify

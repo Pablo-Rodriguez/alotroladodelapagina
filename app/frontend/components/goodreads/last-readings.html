@@ -1,0 +1,29 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="./book-view.html">
+
+<dom-module id="last-readings">
+    <template>
+        <link rel="stylesheet" href="../../css/last-readings.css" media="screen" title="no title" charset="utf-8">
+        <iron-ajax
+            auto
+            url="/last-readings"
+            handle-as="json"
+            last-response="{{readings}}"></iron-ajax>
+
+        <div id="wrapper">
+            <h3>Últimas lecturas</h3>
+            <div>
+                <template is="dom-repeat" items="{{readings}}" as="model">
+                    <book-view model="{{model}}"></book-view>
+                </template>
+            </div>
+        </div>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'last-readings'
+        });
+    </script>
+</dom-module>

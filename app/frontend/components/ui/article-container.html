@@ -1,0 +1,25 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+
+<dom-module id="article-container">
+    <template>
+        <link rel="stylesheet" href="../../css/article-container.css">
+        <article class="article-container--styles" id="body"></article>
+    </template>
+    <script>
+        Polymer({
+            is: 'article-container',
+            properties: {
+                text: String
+            },
+            observers: [
+                '_render(text)'
+            ],
+            _render: function (text) {
+                this.$.body.innerHTML = text;
+            },
+            ready: function () {
+                this._render(this.text);
+            }
+        });
+    </script>
+</dom-module>

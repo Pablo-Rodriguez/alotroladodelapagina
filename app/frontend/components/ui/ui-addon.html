@@ -1,0 +1,36 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+
+<dom-module id="ui-addon">
+    <template>
+        <link rel="stylesheet" href="../../css/ui-addon.css">
+        <span id="icon" class$="{{icon}}"></span>
+        <span id="text">{{text}}</span>
+        <a href$="{{href}}"><content></content></a>
+    </template>
+    <script>
+        Polymer({
+            is: 'ui-addon',
+            properties: {
+                icon: {
+                    type: String,
+                    value: ""
+                },
+                href: {
+                    type: String,
+                    value: ""
+                },
+                text: {
+                    type: String,
+                    value: ""
+                }
+            },
+            ready: function () {
+                if (!!this.icon) {
+                    this.$.text.style.display = 'none';
+                } else if(!!this.text) {
+                    this.$.icon.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</dom-module>

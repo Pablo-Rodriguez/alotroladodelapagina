@@ -1,0 +1,44 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="blog-entry.html">
+<link rel="import" href="../ui/ui-pagination.html">
+
+<dom-module id="blog-container">
+    <template>
+        <link rel="stylesheet" href="../../css/blog-container.css">
+        <template is="dom-repeat" items="{{data}}" as="model">
+            <blog-entry model="{{model}}"></blog-entry>
+        </template>
+        <ui-pagination id="pagination"></ui-pagination>
+    </template>
+    <script>
+        Polymer({
+            is: 'blog-container',
+            properties: {
+                data: {
+                    type: Array,
+                    value: function () {return [];}
+                },
+                more: {
+                    type: Boolean,
+                    value: false,
+                    observer: 'updatePagination'
+                },
+                page: {
+                    type: Number,
+                    value: 0,
+                    observer: 'updatePagination'
+                }
+            },
+            updatePagination: function () {
+                this.$.pagination.left = !!this.page;
+                this.$.pagination.right = this.more;
+            },
+            ready: function () {
+                this.updatePagination();
+            },
+            _leftClick: function () {
+                console.log('click')
+            }
+        });
+    </script>
+</dom-module>

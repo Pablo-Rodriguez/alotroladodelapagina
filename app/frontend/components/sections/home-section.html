@@ -1,15 +1,82 @@
 <link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../blog/blog-container.html">
+<link rel="import" href="./not-found.html">
 
 <dom-module id="home-section">
     <template>
         <link rel="stylesheet" href="../../css/home-section.css">
+        <iron-ajax
+            auto
+            url="/articles"
+            params="{{params}}"
+            handle-as="json"
+            last-response="{{response}}"></iron-ajax>
         <section>
-            <h2>Home</h2>
+            <template is="dom-if" if="{{!response.err}}" restamp="true">
+                <blog-container
+                    data="{{response.articles}}"
+                    page="{{page}}"
+                    more="{{response.more}}"
+                    on-lclick="_leftClick"
+                    on-rclick="_rightClick"></blog-container>
+            </template>
+            <template is="dom-if" if="{{response.err}}" restamp="true">
+                <not-found></not-found>
+            </template>
         </section>
     </template>
     <script>
         Polymer({
-            is: 'home-section'
+            is: 'home-section',
+            properties: {
+                response: {
+                    type: Object,
+                    value: function () {
+                        return {
+                            err: false,
+                            articles: []
+                        }
+                    },
+                    observer: '_onChange'
+                },
+                page: {
+                    type: Number,
+                    value: 0
+                },
+                params: {
+                    type: Object,
+                    value: function () {
+                        return {};
+                    },
+                    computed: '_computeParams(page)'
+                }
+            },
+            _onChange: function () {
+                if (window.localStorage) {
+                    if (this.response.articles && this.response.articles.forEach) {
+                        this.response.articles.forEach(function (article) {
+                            window.localStorage.setItem(
+                                article.title.split(' ').join('-'),
+                                JSON.stringify(article)
+                            );
+                        });
+                    }
+                }
+            },
+            _computeParams: function (page) {
+                return {
+                    'page': page
+                };
+            },
+            _leftClick: function () {
+                this.page--;
+                window.scrollTo(0, 0);
+            },
+            _rightClick: function () {
+                this.page++;
+                window.scrollTo(0, 0);
+            }
         });
     </script>
 </dom-module>

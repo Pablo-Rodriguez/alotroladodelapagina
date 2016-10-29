@@ -1,0 +1,45 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+
+<dom-module id="ui-stars">
+    <template>
+        <style>
+            :host {
+                display: block;
+                color: var(--ui-star-void-color, #888);
+            }
+            :host .star {
+                color: var(--ui-star-fill-color, red);
+            }
+        </style>
+        <div id="container">
+            <span>★</span>
+            <span>★</span>
+            <span>★</span>
+            <span>★</span>
+            <span>★</span>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'ui-stars',
+            properties: {
+                max: {
+                    type: Number,
+                    value: 5
+                },
+                value: {
+                    type: Number,
+                    value: 0
+                }
+            },
+            ready: function () {
+                let stars = this.$.container.children;
+                Array.prototype.slice.apply(stars).forEach(function (star, i) {
+                    if (i < this.value) {
+                        star.classList.add('star');
+                    }
+                }.bind(this));
+            }
+        });
+    </script>
+</dom-module>

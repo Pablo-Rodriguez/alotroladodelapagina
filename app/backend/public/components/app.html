@@ -8147,15 +8147,1252 @@ this._children = Polymer.TreeApi.arrayCopyChildNodes(this.root);
 this._insertChildren();
 this.fire('dom-change');
 }
-});</script><dom-module id=home-section assetpath="sections/"><template><style>
-:host{display:block}
-</style><section><h2>Home</h2></section></template><script>
+});</script><script>/**
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+function MakePromise (asap) {
+  function Promise(fn) {
+		if (typeof this !== 'object' || typeof fn !== 'function') throw new TypeError();
+		this._state = null;
+		this._value = null;
+		this._deferreds = []
+
+		doResolve(fn, resolve.bind(this), reject.bind(this));
+	}
+
+	function handle(deferred) {
+		var me = this;
+		if (this._state === null) {
+			this._deferreds.push(deferred);
+			return
+		}
+		asap(function() {
+			var cb = me._state ? deferred.onFulfilled : deferred.onRejected
+			if (typeof cb !== 'function') {
+				(me._state ? deferred.resolve : deferred.reject)(me._value);
+				return;
+			}
+			var ret;
+			try {
+				ret = cb(me._value);
+			}
+			catch (e) {
+				deferred.reject(e);
+				return;
+			}
+			deferred.resolve(ret);
+		})
+	}
+
+	function resolve(newValue) {
+		try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+			if (newValue === this) throw new TypeError();
+			if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+				var then = newValue.then;
+				if (typeof then === 'function') {
+					doResolve(then.bind(newValue), resolve.bind(this), reject.bind(this));
+					return;
+				}
+			}
+			this._state = true;
+			this._value = newValue;
+			finale.call(this);
+		} catch (e) { reject.call(this, e); }
+	}
+
+	function reject(newValue) {
+		this._state = false;
+		this._value = newValue;
+		finale.call(this);
+	}
+
+	function finale() {
+		for (var i = 0, len = this._deferreds.length; i < len; i++) {
+			handle.call(this, this._deferreds[i]);
+		}
+		this._deferreds = null;
+	}
+
+	/**
+	 * Take a potentially misbehaving resolver function and make sure
+	 * onFulfilled and onRejected are only called once.
+	 *
+	 * Makes no guarantees about asynchrony.
+	 */
+	function doResolve(fn, onFulfilled, onRejected) {
+		var done = false;
+		try {
+			fn(function (value) {
+				if (done) return;
+				done = true;
+				onFulfilled(value);
+			}, function (reason) {
+				if (done) return;
+				done = true;
+				onRejected(reason);
+			})
+		} catch (ex) {
+			if (done) return;
+			done = true;
+			onRejected(ex);
+		}
+	}
+
+	Promise.prototype['catch'] = function (onRejected) {
+		return this.then(null, onRejected);
+	};
+
+	Promise.prototype.then = function(onFulfilled, onRejected) {
+		var me = this;
+		return new Promise(function(resolve, reject) {
+      handle.call(me, {
+        onFulfilled: onFulfilled,
+        onRejected: onRejected,
+        resolve: resolve,
+        reject: reject
+      });
+		})
+	};
+
+	Promise.resolve = function (value) {
+		if (value && typeof value === 'object' && value.constructor === Promise) {
+			return value;
+		}
+
+		return new Promise(function (resolve) {
+			resolve(value);
+		});
+	};
+
+	Promise.reject = function (value) {
+		return new Promise(function (resolve, reject) {
+			reject(value);
+		});
+	};
+
+	
+  return Promise;
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = MakePromise;
+}
+
+</script><script>
+if (!window.Promise) {
+  window.Promise = MakePromise(Polymer.Base.async);
+}
+</script><script>
+  'use strict';
+
+  Polymer({
+    is: 'iron-request',
+
+    hostAttributes: {
+      hidden: true
+    },
+
+    properties: {
+
+      /**
+       * A reference to the XMLHttpRequest instance used to generate the
+       * network request.
+       *
+       * @type {XMLHttpRequest}
+       */
+      xhr: {
+        type: Object,
+        notify: true,
+        readOnly: true,
+        value: function() {
+          return new XMLHttpRequest();
+        }
+      },
+
+      /**
+       * A reference to the parsed response body, if the `xhr` has completely
+       * resolved.
+       *
+       * @type {*}
+       * @default null
+       */
+      response: {
+        type: Object,
+        notify: true,
+        readOnly: true,
+        value: function() {
+          return null;
+        }
+      },
+
+      /**
+       * A reference to the status code, if the `xhr` has completely resolved.
+       */
+      status: {
+        type: Number,
+        notify: true,
+        readOnly: true,
+        value: 0
+      },
+
+      /**
+       * A reference to the status text, if the `xhr` has completely resolved.
+       */
+      statusText: {
+        type: String,
+        notify: true,
+        readOnly: true,
+        value: ''
+      },
+
+      /**
+       * A promise that resolves when the `xhr` response comes back, or rejects
+       * if there is an error before the `xhr` completes.
+       *
+       * @type {Promise}
+       */
+      completes: {
+        type: Object,
+        readOnly: true,
+        notify: true,
+        value: function() {
+          return new Promise(function (resolve, reject) {
+            this.resolveCompletes = resolve;
+            this.rejectCompletes = reject;
+          }.bind(this));
+        }
+      },
+
+      /**
+       * An object that contains progress information emitted by the XHR if
+       * available.
+       *
+       * @default {}
+       */
+      progress: {
+        type: Object,
+        notify: true,
+        readOnly: true,
+        value: function() {
+          return {};
+        }
+      },
+
+      /**
+       * Aborted will be true if an abort of the request is attempted.
+       */
+      aborted: {
+        type: Boolean,
+        notify: true,
+        readOnly: true,
+        value: false,
+      },
+
+      /**
+       * Errored will be true if the browser fired an error event from the
+       * XHR object (mainly network errors).
+       */
+      errored: {
+        type: Boolean,
+        notify: true,
+        readOnly: true,
+        value: false
+      },
+
+      /**
+       * TimedOut will be true if the XHR threw a timeout event.
+       */
+      timedOut: {
+        type: Boolean,
+        notify: true,
+        readOnly: true,
+        value: false
+      }
+    },
+
+    /**
+     * Succeeded is true if the request succeeded. The request succeeded if it
+     * loaded without error, wasn't aborted, and the status code is ≥ 200, and
+     * < 300, or if the status code is 0.
+     *
+     * The status code 0 is accepted as a success because some schemes - e.g.
+     * file:// - don't provide status codes.
+     *
+     * @return {boolean}
+     */
+    get succeeded() {
+      if (this.errored || this.aborted || this.timedOut) {
+        return false;
+      }
+      var status = this.xhr.status || 0;
+
+      // Note: if we are using the file:// protocol, the status code will be 0
+      // for all outcomes (successful or otherwise).
+      return status === 0 ||
+        (status >= 200 && status < 300);
+    },
+
+    /**
+     * Sends an HTTP request to the server and returns the XHR object.
+     *
+     * The handling of the `body` parameter will vary based on the Content-Type
+     * header. See the docs for iron-ajax's `body` param for details.
+     *
+     * @param {{
+     *   url: string,
+     *   method: (string|undefined),
+     *   async: (boolean|undefined),
+     *   body: (ArrayBuffer|ArrayBufferView|Blob|Document|FormData|null|string|undefined|Object),
+     *   headers: (Object|undefined),
+     *   handleAs: (string|undefined),
+     *   jsonPrefix: (string|undefined),
+     *   withCredentials: (boolean|undefined)}} options -
+     *     url The url to which the request is sent.
+     *     method The HTTP method to use, default is GET.
+     *     async By default, all requests are sent asynchronously. To send synchronous requests,
+     *         set to false.
+     *     body The content for the request body for POST method.
+     *     headers HTTP request headers.
+     *     handleAs The response type. Default is 'text'.
+     *     withCredentials Whether or not to send credentials on the request. Default is false.
+     *   timeout: (Number|undefined)
+     * @return {Promise}
+     */
+    send: function (options) {
+      var xhr = this.xhr;
+
+      if (xhr.readyState > 0) {
+        return null;
+      }
+
+      xhr.addEventListener('progress', function (progress) {
+        this._setProgress({
+          lengthComputable: progress.lengthComputable,
+          loaded: progress.loaded,
+          total: progress.total
+        });
+      }.bind(this))
+
+      xhr.addEventListener('error', function (error) {
+        this._setErrored(true);
+        this._updateStatus();
+        this.rejectCompletes(error);
+      }.bind(this));
+
+      xhr.addEventListener('timeout', function (error) {
+        this._setTimedOut(true);
+        this._updateStatus();
+        this.rejectCompletes(error);
+      }.bind(this));
+
+      xhr.addEventListener('abort', function () {
+        this._updateStatus();
+        this.rejectCompletes(new Error('Request aborted.'));
+      }.bind(this));
+
+      // Called after all of the above.
+      xhr.addEventListener('loadend', function () {
+        this._updateStatus();
+        this._setResponse(this.parseResponse());
+
+        if (!this.succeeded) {
+          this.rejectCompletes(new Error('The request failed with status code: ' + this.xhr.status));
+          return;
+        }
+
+        this.resolveCompletes(this);
+      }.bind(this));
+
+      this.url = options.url;
+      xhr.open(
+        options.method || 'GET',
+        options.url,
+        options.async !== false
+      );
+
+      var acceptType = {
+        'json': 'application/json',
+        'text': 'text/plain',
+        'html': 'text/html',
+        'xml': 'application/xml',
+        'arraybuffer': 'application/octet-stream'
+      }[options.handleAs];
+      var headers = options.headers || Object.create(null);
+      var newHeaders = Object.create(null);
+      for (var key in headers) {
+        newHeaders[key.toLowerCase()] = headers[key];
+      }
+      headers = newHeaders;
+
+      if (acceptType && !headers['accept']) {
+        headers['accept'] = acceptType;
+      }
+      Object.keys(headers).forEach(function (requestHeader) {
+        if (/[A-Z]/.test(requestHeader)) {
+          Polymer.Base._error('Headers must be lower case, got', requestHeader);
+        }
+        xhr.setRequestHeader(
+          requestHeader,
+          headers[requestHeader]
+        );
+      }, this);
+
+      if (options.async !== false) {
+        if (options.async) {
+          xhr.timeout = options.timeout;
+        }
+
+        var handleAs = options.handleAs;
+
+        // If a JSON prefix is present, the responseType must be 'text' or the
+        // browser won’t be able to parse the response.
+        if (!!options.jsonPrefix || !handleAs) {
+          handleAs = 'text';
+        }
+
+        // In IE, `xhr.responseType` is an empty string when the response
+        // returns. Hence, caching it as `xhr._responseType`.
+        xhr.responseType = xhr._responseType = handleAs;
+
+        // Cache the JSON prefix, if it exists.
+        if (!!options.jsonPrefix) {
+          xhr._jsonPrefix = options.jsonPrefix;
+        }
+      }
+
+      xhr.withCredentials = !!options.withCredentials;
+
+
+      var body = this._encodeBodyObject(options.body, headers['content-type']);
+
+      xhr.send(
+        /** @type {ArrayBuffer|ArrayBufferView|Blob|Document|FormData|
+                   null|string|undefined} */
+        (body));
+
+      return this.completes;
+    },
+
+    /**
+     * Attempts to parse the response body of the XHR. If parsing succeeds,
+     * the value returned will be deserialized based on the `responseType`
+     * set on the XHR.
+     *
+     * @return {*} The parsed response,
+     * or undefined if there was an empty response or parsing failed.
+     */
+    parseResponse: function () {
+      var xhr = this.xhr;
+      var responseType = xhr.responseType || xhr._responseType;
+      var preferResponseText = !this.xhr.responseType;
+      var prefixLen = (xhr._jsonPrefix && xhr._jsonPrefix.length) || 0;
+
+      try {
+        switch (responseType) {
+          case 'json':
+            // If the xhr object doesn't have a natural `xhr.responseType`,
+            // we can assume that the browser hasn't parsed the response for us,
+            // and so parsing is our responsibility. Likewise if response is
+            // undefined, as there's no way to encode undefined in JSON.
+            if (preferResponseText || xhr.response === undefined) {
+              // Try to emulate the JSON section of the response body section of
+              // the spec: https://xhr.spec.whatwg.org/#response-body
+              // That is to say, we try to parse as JSON, but if anything goes
+              // wrong return null.
+              try {
+                return JSON.parse(xhr.responseText);
+              } catch (_) {
+                return null;
+              }
+            }
+
+            return xhr.response;
+          case 'xml':
+            return xhr.responseXML;
+          case 'blob':
+          case 'document':
+          case 'arraybuffer':
+            return xhr.response;
+          case 'text':
+          default: {
+            // If `prefixLen` is set, it implies the response should be parsed
+            // as JSON once the prefix of length `prefixLen` is stripped from
+            // it. Emulate the behavior above where null is returned on failure
+            // to parse.
+            if (prefixLen) {
+              try {
+                return JSON.parse(xhr.responseText.substring(prefixLen));
+              } catch (_) {
+                return null;
+              }
+            }
+            return xhr.responseText;
+          }
+        }
+      } catch (e) {
+        this.rejectCompletes(new Error('Could not parse response. ' + e.message));
+      }
+    },
+
+    /**
+     * Aborts the request.
+     */
+    abort: function () {
+      this._setAborted(true);
+      this.xhr.abort();
+    },
+
+    /**
+     * @param {*} body The given body of the request to try and encode.
+     * @param {?string} contentType The given content type, to infer an encoding
+     *     from.
+     * @return {*} Either the encoded body as a string, if successful,
+     *     or the unaltered body object if no encoding could be inferred.
+     */
+    _encodeBodyObject: function(body, contentType) {
+      if (typeof body == 'string') {
+        return body;  // Already encoded.
+      }
+      var bodyObj = /** @type {Object} */ (body);
+      switch(contentType) {
+        case('application/json'):
+          return JSON.stringify(bodyObj);
+        case('application/x-www-form-urlencoded'):
+          return this._wwwFormUrlEncode(bodyObj);
+      }
+      return body;
+    },
+
+    /**
+     * @param {Object} object The object to encode as x-www-form-urlencoded.
+     * @return {string} .
+     */
+    _wwwFormUrlEncode: function(object) {
+      if (!object) {
+        return '';
+      }
+      var pieces = [];
+      Object.keys(object).forEach(function(key) {
+        // TODO(rictic): handle array values here, in a consistent way with
+        //   iron-ajax params.
+        pieces.push(
+            this._wwwFormUrlEncodePiece(key) + '=' +
+            this._wwwFormUrlEncodePiece(object[key]));
+      }, this);
+      return pieces.join('&');
+    },
+
+    /**
+     * @param {*} str A key or value to encode as x-www-form-urlencoded.
+     * @return {string} .
+     */
+    _wwwFormUrlEncodePiece: function(str) {
+      // Spec says to normalize newlines to \r\n and replace %20 spaces with +.
+      // jQuery does this as well, so this is likely to be widely compatible.
+      if (str === null) {
+        return '';
+      }
+      return encodeURIComponent(str.toString().replace(/\r?\n/g, '\r\n'))
+          .replace(/%20/g, '+');
+    },
+
+    /**
+     * Updates the status code and status text.
+     */
+    _updateStatus: function() {
+      this._setStatus(this.xhr.status);
+      this._setStatusText((this.xhr.statusText === undefined) ? '' : this.xhr.statusText);
+    }
+  });
+</script><script>
+  'use strict';
+
+  Polymer({
+
+    is: 'iron-ajax',
+
+    /**
+     * Fired when a request is sent.
+     *
+     * @event request
+     * @event iron-ajax-request
+     */
+
+    /**
+     * Fired when a response is received.
+     *
+     * @event response
+     * @event iron-ajax-response
+     */
+
+    /**
+     * Fired when an error is received.
+     *
+     * @event error
+     * @event iron-ajax-error
+     */
+
+    hostAttributes: {
+      hidden: true
+    },
+
+    properties: {
+      /**
+       * The URL target of the request.
+       */
+      url: {
+        type: String
+      },
+
+      /**
+       * An object that contains query parameters to be appended to the
+       * specified `url` when generating a request. If you wish to set the body
+       * content when making a POST request, you should use the `body` property
+       * instead.
+       */
+      params: {
+        type: Object,
+        value: function() {
+          return {};
+        }
+      },
+
+      /**
+       * The HTTP method to use such as 'GET', 'POST', 'PUT', or 'DELETE'.
+       * Default is 'GET'.
+       */
+      method: {
+        type: String,
+        value: 'GET'
+      },
+
+      /**
+       * HTTP request headers to send.
+       *
+       * Example:
+       *
+       *     <iron-ajax
+       *         auto
+       *         url="http://somesite.com"
+       *         headers='{"X-Requested-With": "XMLHttpRequest"}'
+       *         handle-as="json"></iron-ajax>
+       *
+       * Note: setting a `Content-Type` header here will override the value
+       * specified by the `contentType` property of this element.
+       */
+      headers: {
+        type: Object,
+        value: function() {
+          return {};
+        }
+      },
+
+      /**
+       * Content type to use when sending data. If the `contentType` property
+       * is set and a `Content-Type` header is specified in the `headers`
+       * property, the `headers` property value will take precedence.
+       *
+       * Varies the handling of the `body` param.
+       */
+      contentType: {
+        type: String,
+        value: null
+      },
+
+      /**
+       * Body content to send with the request, typically used with "POST"
+       * requests.
+       *
+       * If body is a string it will be sent unmodified.
+       *
+       * If Content-Type is set to a value listed below, then
+       * the body will be encoded accordingly.
+       *
+       *    * `content-type="application/json"`
+       *      * body is encoded like `{"foo":"bar baz","x":1}`
+       *    * `content-type="application/x-www-form-urlencoded"`
+       *      * body is encoded like `foo=bar+baz&x=1`
+       *
+       * Otherwise the body will be passed to the browser unmodified, and it
+       * will handle any encoding (e.g. for FormData, Blob, ArrayBuffer).
+       *
+       * @type (ArrayBuffer|ArrayBufferView|Blob|Document|FormData|null|string|undefined|Object)
+       */
+      body: {
+        type: Object,
+        value: null
+      },
+
+      /**
+       * Toggle whether XHR is synchronous or asynchronous. Don't change this
+       * to true unless You Know What You Are Doing™.
+       */
+      sync: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Specifies what data to store in the `response` property, and
+       * to deliver as `event.detail.response` in `response` events.
+       *
+       * One of:
+       *
+       *    `text`: uses `XHR.responseText`.
+       *
+       *    `xml`: uses `XHR.responseXML`.
+       *
+       *    `json`: uses `XHR.responseText` parsed as JSON.
+       *
+       *    `arraybuffer`: uses `XHR.response`.
+       *
+       *    `blob`: uses `XHR.response`.
+       *
+       *    `document`: uses `XHR.response`.
+       */
+      handleAs: {
+        type: String,
+        value: 'json'
+      },
+
+      /**
+       * Set the withCredentials flag on the request.
+       */
+      withCredentials: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set the timeout flag on the request.
+       */
+      timeout: {
+        type: Number,
+        value: 0
+      },
+
+      /**
+       * If true, automatically performs an Ajax request when either `url` or
+       * `params` changes.
+       */
+      auto: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * If true, error messages will automatically be logged to the console.
+       */
+      verbose: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * The most recent request made by this iron-ajax element.
+       */
+      lastRequest: {
+        type: Object,
+        notify: true,
+        readOnly: true
+      },
+
+      /**
+       * True while lastRequest is in flight.
+       */
+      loading: {
+        type: Boolean,
+        notify: true,
+        readOnly: true
+      },
+
+      /**
+       * lastRequest's response.
+       *
+       * Note that lastResponse and lastError are set when lastRequest finishes,
+       * so if loading is true, then lastResponse and lastError will correspond
+       * to the result of the previous request.
+       *
+       * The type of the response is determined by the value of `handleAs` at
+       * the time that the request was generated.
+       *
+       * @type {Object}
+       */
+      lastResponse: {
+        type: Object,
+        notify: true,
+        readOnly: true
+      },
+
+      /**
+       * lastRequest's error, if any.
+       *
+       * @type {Object}
+       */
+      lastError: {
+        type: Object,
+        notify: true,
+        readOnly: true
+      },
+
+      /**
+       * An Array of all in-flight requests originating from this iron-ajax
+       * element.
+       */
+      activeRequests: {
+        type: Array,
+        notify: true,
+        readOnly: true,
+        value: function() {
+          return [];
+        }
+      },
+
+      /**
+       * Length of time in milliseconds to debounce multiple automatically generated requests.
+       */
+      debounceDuration: {
+        type: Number,
+        value: 0,
+        notify: true
+      },
+
+      /**
+       * Prefix to be stripped from a JSON response before parsing it.
+       *
+       * In order to prevent an attack using CSRF with Array responses
+       * (http://haacked.com/archive/2008/11/20/anatomy-of-a-subtle-json-vulnerability.aspx/)
+       * many backends will mitigate this by prefixing all JSON response bodies
+       * with a string that would be nonsensical to a JavaScript parser.
+       *
+       */
+      jsonPrefix: {
+        type: String,
+        value: ''
+      },
+
+      /**
+       * By default, iron-ajax's events do not bubble. Setting this attribute will cause its
+       * request and response events as well as its iron-ajax-request, -response,  and -error
+       * events to bubble to the window object. The vanilla error event never bubbles when
+       * using shadow dom even if this.bubbles is true because a scoped flag is not passed with
+       * it (first link) and because the shadow dom spec did not used to allow certain events,
+       * including events named error, to leak outside of shadow trees (second link).
+       * https://www.w3.org/TR/shadow-dom/#scoped-flag
+       * https://www.w3.org/TR/2015/WD-shadow-dom-20151215/#events-that-are-not-leaked-into-ancestor-trees
+       */
+      bubbles: {
+        type: Boolean,
+        value: false
+      },
+
+      _boundHandleResponse: {
+        type: Function,
+        value: function() {
+          return this._handleResponse.bind(this);
+        }
+      }
+    },
+
+    observers: [
+      '_requestOptionsChanged(url, method, params.*, headers, contentType, ' +
+          'body, sync, handleAs, jsonPrefix, withCredentials, timeout, auto)'
+    ],
+
+    /**
+     * The query string that should be appended to the `url`, serialized from
+     * the current value of `params`.
+     *
+     * @return {string}
+     */
+    get queryString () {
+      var queryParts = [];
+      var param;
+      var value;
+
+      for (param in this.params) {
+        value = this.params[param];
+        param = window.encodeURIComponent(param);
+
+        if (Array.isArray(value)) {
+          for (var i = 0; i < value.length; i++) {
+            queryParts.push(param + '=' + window.encodeURIComponent(value[i]));
+          }
+        } else if (value !== null) {
+          queryParts.push(param + '=' + window.encodeURIComponent(value));
+        } else {
+          queryParts.push(param);
+        }
+      }
+
+      return queryParts.join('&');
+    },
+
+    /**
+     * The `url` with query string (if `params` are specified), suitable for
+     * providing to an `iron-request` instance.
+     *
+     * @return {string}
+     */
+    get requestUrl() {
+      var queryString = this.queryString;
+      var url = this.url || '';
+
+      if (queryString) {
+        var bindingChar = url.indexOf('?') >= 0 ? '&' : '?';
+        return url + bindingChar + queryString;
+      }
+
+      return url;
+    },
+
+    /**
+     * An object that maps header names to header values, first applying the
+     * the value of `Content-Type` and then overlaying the headers specified
+     * in the `headers` property.
+     *
+     * @return {Object}
+     */
+    get requestHeaders() {
+      var headers = {};
+      var contentType = this.contentType;
+      if (contentType == null && (typeof this.body === 'string')) {
+        contentType = 'application/x-www-form-urlencoded';
+      }
+      if (contentType) {
+        headers['content-type'] = contentType;
+      }
+      var header;
+
+      if (this.headers instanceof Object) {
+        for (header in this.headers) {
+          headers[header] = this.headers[header].toString();
+        }
+      }
+
+      return headers;
+    },
+
+    /**
+     * Request options suitable for generating an `iron-request` instance based
+     * on the current state of the `iron-ajax` instance's properties.
+     *
+     * @return {{
+     *   url: string,
+     *   method: (string|undefined),
+     *   async: (boolean|undefined),
+     *   body: (ArrayBuffer|ArrayBufferView|Blob|Document|FormData|null|string|undefined|Object),
+     *   headers: (Object|undefined),
+     *   handleAs: (string|undefined),
+     *   jsonPrefix: (string|undefined),
+     *   withCredentials: (boolean|undefined)}}
+     */
+    toRequestOptions: function() {
+      return {
+        url: this.requestUrl || '',
+        method: this.method,
+        headers: this.requestHeaders,
+        body: this.body,
+        async: !this.sync,
+        handleAs: this.handleAs,
+        jsonPrefix: this.jsonPrefix,
+        withCredentials: this.withCredentials,
+        timeout: this.timeout
+      };
+    },
+
+    /**
+     * Performs an AJAX request to the specified URL.
+     *
+     * @return {!IronRequestElement}
+     */
+    generateRequest: function() {
+      var request = /** @type {!IronRequestElement} */ (document.createElement('iron-request'));
+      var requestOptions = this.toRequestOptions();
+
+      this.push('activeRequests', request);
+
+      request.completes.then(
+        this._boundHandleResponse
+      ).catch(
+        this._handleError.bind(this, request)
+      ).then(
+        this._discardRequest.bind(this, request)
+      );
+
+      request.send(requestOptions);
+
+      this._setLastRequest(request);
+      this._setLoading(true);
+
+      this.fire('request', {
+        request: request,
+        options: requestOptions
+      }, {bubbles: this.bubbles});
+
+      this.fire('iron-ajax-request', {
+        request: request,
+        options: requestOptions
+      }, {bubbles: this.bubbles});
+
+      return request;
+    },
+
+    _handleResponse: function(request) {
+      if (request === this.lastRequest) {
+        this._setLastResponse(request.response);
+        this._setLastError(null);
+        this._setLoading(false);
+      }
+      this.fire('response', request, {bubbles: this.bubbles});
+      this.fire('iron-ajax-response', request, {bubbles: this.bubbles});
+    },
+
+    _handleError: function(request, error) {
+      if (this.verbose) {
+        Polymer.Base._error(error);
+      }
+
+      if (request === this.lastRequest) {
+        this._setLastError({
+          request: request,
+          error: error,
+          status: request.xhr.status,
+          statusText: request.xhr.statusText,
+          response: request.xhr.response
+        });
+        this._setLastResponse(null);
+        this._setLoading(false);
+      }
+
+      // Tests fail if this goes after the normal this.fire('error', ...)
+      this.fire('iron-ajax-error', {
+        request: request,
+        error: error
+      }, {bubbles: this.bubbles});
+
+      this.fire('error', {
+        request: request,
+        error: error
+      }, {bubbles: this.bubbles});
+    },
+
+    _discardRequest: function(request) {
+      var requestIndex = this.activeRequests.indexOf(request);
+
+      if (requestIndex > -1) {
+        this.splice('activeRequests', requestIndex, 1);
+      }
+    },
+
+    _requestOptionsChanged: function() {
+      this.debounce('generate-request', function() {
+        if (this.url == null) {
+          return;
+        }
+
+        if (this.auto) {
+          this.generateRequest();
+        }
+      }, this.debounceDuration);
+    },
+
+  });
+</script><dom-module id=article-container assetpath="ui/"><template><style>
+:host #body{text-align:justify;color:var(--article-container-color);font-size:18px}
+</style><article class=article-container--styles id=body></article></template><script>
         Polymer({
-            is: 'home-section'
+            is: 'article-container',
+            properties: {
+                text: String
+            },
+            observers: [
+                '_render(text)'
+            ],
+            _render: function (text) {
+                this.$.body.innerHTML = text;
+            },
+            ready: function () {
+                this._render(this.text);
+            }
+        });
+    </script></dom-module><dom-module id=ui-tag assetpath="ui/"><template><style>
+:host{display:inline-block;background-color:var(--secondary-color);color:#fff;padding:.4em;margin:.3em .4em;border-radius:4px}
+</style><span>#{{text}}</span></template><script>
+        Polymer({
+            is: 'ui-tag',
+            properties: {
+                text: String
+            }
+        });
+    </script></dom-module><dom-module id=blog-entry assetpath="blog/"><template><style>
+:host{display:block;background-color:#fff;padding:1em;padding-right:0;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);border:2px solid var(--dark-color);border-radius:5px;margin:1em auto;max-width:1000px;}:host > article header{display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:center;-moz-box-align:center;-o-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:justify;-moz-box-pack:justify;-o-box-pack:justify;-ms-flex-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;}:host > article header h2{cursor:pointer;color:var(--dark-color);font-size:16px;-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;text-align:justify}:host > article header h5{display:none}:host > article header #more{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:0 0 20%;-ms-flex:0 0 20%;flex:0 0 20%;text-align:center;}:host > article header #more span{cursor:pointer;background-color:var(--secondary-color);color:var(--light-color);border-radius:1000px;-webkit-box-shadow:0 2px 3px rgba(0,0,0,0.3);box-shadow:0 2px 3px rgba(0,0,0,0.3);font-size:170%;padding:.2em;display:block;margin:0 auto;width:1em;height:1em;}:host > article header #more span:hover{-webkit-box-shadow:0 2px 6px rgba(0,0,0,0.3);box-shadow:0 2px 6px rgba(0,0,0,0.3)}:host > article header #more span:active{-webkit-box-shadow:0 2px 1px rgba(0,0,0,0.3);box-shadow:0 2px 1px rgba(0,0,0,0.3)}:host > article > article-container{display:none}:host > article > footer{display:none}@media screen and (min-width:600px){:host{padding:0;margin-bottom:2em;}:host > article header{display:block;padding:2em 2em 1em 2em;}:host > article header h2{font-size:30px;}:host > article header h2:hover{color:var(--secondary-color)}:host > article header h5{font-size:16px;color:var(--secondary-color);display:block;text-align:right}:host > article header #more{display:none}:host > article > article-container{display:block}:host > article > footer{display:block;padding:1em}}
+</style><article><header><h2 on-click=_navigate>{{model.title}}</h2><h5>{{computedDate}}</h5><div id=more><span class=icon-eye on-click=_navigate></span></div></header><article-container text={{model.body}}></article-container><footer><template is=dom-repeat items={{model.tags}} as=tag><ui-tag text={{tag}}></ui-tag></template></footer></article></template><script>
+        Polymer({
+            is: 'blog-entry',
+            properties: {
+                model: Object,
+                computedDate: {
+                    type: String,
+                    computed: '_computeDate(model.date)'
+                }
+            },
+            _navigate: function () {
+                window.location.hash = '#/blog/' + String(this.model.title).split(' ').join('-');
+            },
+            _computeDate: function (date) {
+                date = new Date(date);
+                var day = date.getDate();
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+                var hours = date.getHours();
+                hours = String(hours).split('').length < 1 ? "00" :
+                    String(hours).split('').length < 2 ? "0" + hours : hours;
+                var minutes = date.getMinutes();
+                minutes = String(minutes).split('').length < 1 ? "00" :
+                    String(minutes).split('').length < 2 ? "0" + minutes : minutes;
+                return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+            }
+        });
+    </script></dom-module><dom-module id=ui-pagination assetpath="ui/"><template><style>
+:host{font-size:16px;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-pack:distribute;-moz-box-pack:distribute;-o-box-pack:distribute;-ms-flex-pack:distribute;-webkit-justify-content:space-around;justify-content:space-around;-webkit-box-align:center;-moz-box-align:center;-o-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;padding:1em;max-width:1000px;margin:0 auto;}:host .side,:host .middle{background-color:var(--dark-color);border-radius:200px;color:var(--light-color);-webkit-box-shadow:0 2px 3px rgba(0,0,0,0.3);box-shadow:0 2px 3px rgba(0,0,0,0.3)}:host .side{cursor:pointer;font-size:170%;padding:.3em;width:1em;height:1em;text-align:center;}:host .side:hover{-webkit-box-shadow:0 2px 6px rgba(0,0,0,0.3);box-shadow:0 2px 6px rgba(0,0,0,0.3)}:host .side:active{-webkit-box-shadow:0 2px 1px rgba(0,0,0,0.3);box-shadow:0 2px 1px rgba(0,0,0,0.3)}:host .side span{display:block;margin-left:3px}:host .rotated span{margin-left:-3px;-webkit-transform:rotate(180deg);-moz-transform:rotate(180deg);-o-transform:rotate(180deg);-ms-transform:rotate(180deg);transform:rotate(180deg)}:host .middle{width:15px;height:15px}
+</style><div id=left class="side rotated" on-click=_leftClick><span class=icon-arrow></span></div><div class=middle></div><div class=middle></div><div class=middle></div><div id=right class=side on-click=_rightClick><span class=icon-arrow></span></div></template><script>
+        Polymer({
+            is: 'ui-pagination',
+            properties: {
+                left: {
+                    type: Boolean,
+                    value: false,
+                    observer: '_leftChange'
+                },
+                right: {
+                    type: Boolean,
+                    value: false,
+                    observer: '_rightChange'
+                }
+            },
+            _leftChange: function (value) {
+                if (!value) {
+                    this.$.left.style.visibility = 'hidden';
+                } else {
+                    this.$.left.style.visibility = 'visible';
+                }
+            },
+            _rightChange: function (value) {
+                if (!value) {
+                    this.$.right.style.visibility = 'hidden';
+                } else {
+                    this.$.right.style.visibility = 'visible';
+                }
+            },
+            _leftClick: function () {
+                this.fire('lclick');
+            },
+            _rightClick: function () {
+                this.fire('rclick');
+            }
+        });
+    </script></dom-module><dom-module id=blog-container assetpath="blog/"><template><style>
+:host{display:block;padding:0 1em}@media screen and (min-width:600px){:host{padding:1em 2em 0 2em}}
+</style><template is=dom-repeat items={{data}} as=model><blog-entry model={{model}}></blog-entry></template><ui-pagination id=pagination></ui-pagination></template><script>
+        Polymer({
+            is: 'blog-container',
+            properties: {
+                data: {
+                    type: Array,
+                    value: function () {return [];}
+                },
+                more: {
+                    type: Boolean,
+                    value: false,
+                    observer: 'updatePagination'
+                },
+                page: {
+                    type: Number,
+                    value: 0,
+                    observer: 'updatePagination'
+                }
+            },
+            updatePagination: function () {
+                this.$.pagination.left = !!this.page;
+                this.$.pagination.right = this.more;
+            },
+            ready: function () {
+                this.updatePagination();
+            },
+            _leftClick: function () {
+                console.log('click')
+            }
+        });
+    </script></dom-module><dom-module id=not-found assetpath="sections/"><template><style>
+:host{display:block;padding:0 1em;}:host article{background-color:#fff;padding:1em;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);border:2px solid var(--dark-color);border-radius:5px;margin:1em auto;max-width:1000px}
+</style><article><article-container text="<h2>Lo que buscas no está aquí o no existe</h2> <p class=&quot;center-text font-ultra indent-none&quot;>:(</p>"></article-container></article></template><script>
+        Polymer({
+            is: 'not-found'
+        });
+    </script></dom-module><dom-module id=home-section assetpath="sections/"><template><style>
+:host{display:block;font-size:16px}
+</style><iron-ajax auto url=/articles params={{params}} handle-as=json last-response={{response}}></iron-ajax><section><template is=dom-if if={{!response.err}} restamp=true><blog-container data={{response.articles}} page={{page}} more={{response.more}} on-lclick=_leftClick on-rclick=_rightClick></blog-container></template><template is=dom-if if={{response.err}} restamp=true><not-found></not-found></template></section></template><script>
+        Polymer({
+            is: 'home-section',
+            properties: {
+                response: {
+                    type: Object,
+                    value: function () {
+                        return {
+                            err: false,
+                            articles: []
+                        }
+                    },
+                    observer: '_onChange'
+                },
+                page: {
+                    type: Number,
+                    value: 0
+                },
+                params: {
+                    type: Object,
+                    value: function () {
+                        return {};
+                    },
+                    computed: '_computeParams(page)'
+                }
+            },
+            _onChange: function () {
+                if (window.localStorage) {
+                    if (this.response.articles && this.response.articles.forEach) {
+                        this.response.articles.forEach(function (article) {
+                            window.localStorage.setItem(
+                                article.title.split(' ').join('-'),
+                                JSON.stringify(article)
+                            );
+                        });
+                    }
+                }
+            },
+            _computeParams: function (page) {
+                return {
+                    'page': page
+                };
+            },
+            _leftClick: function () {
+                this.page--;
+                window.scrollTo(0, 0);
+            },
+            _rightClick: function () {
+                this.page++;
+                window.scrollTo(0, 0);
+            }
         });
     </script></dom-module><dom-module id=about-section assetpath="sections/"><template><style>
-:host{display:block}
-</style><section><h2>About</h2></section></template><script>
+:host{display:block;padding:1em;}:host section{display:block;background-color:#fff;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);border:2px solid var(--dark-color);border-radius:5px;margin:1em auto;max-width:1000px}
+</style><section><article-container text="<h2>Sobre este blog.</h2> <div class=&quot;side-image&quot;> <img src=&quot;/img/perfil.jpg&quot;> <div> <p class=&quot;ptop&quot;> Me llamo Pablo y me gusta leer género fantástico. Abro este blog como complemento al <a href=&quot;http://www.ivoox.com/podcast-al-otro-lado-pagina_sq_f1311477_1.html&quot;>podcast</a> porque hay muchos libros que cuando acabo me entran ganas de reseñar pero que, o bien no me pegan con el contenido que estoy subiendo en ese formato, o directamente me supondrían un gasto de tiempo que mis estudios no me permiten. El blog me da un poco más de flexisibilidad y me pertime subir contenido con mayor frecuencia. Espero que lo que encuentres te parezca interesante :) </p> </div> </div> <p class=&quot;indent-none center-text pbottom15&quot;> También me encuentras en <a href=&quot;https://www.goodreads.com/pablorp&quot;>goodreads</a>, en <a href=&quot;https://twitter.com/alotroladodelap&quot;>twitter</a>, en el <a href=&quot;http://www.ivoox.com/podcast-al-otro-lado-pagina_sq_f1311477_1.html&quot;>podcast</a> o en el email <span class=&quot;word-break secondary-color&quot;>alotroladodelapagina@gmail.com</span>. </p>"></article-container></section></template><script>
         Polymer({
             is: 'about-section'
         });
@@ -9754,9 +10991,127 @@ this.fire('dom-change');
       }
     });
 
-  </script></dom-module><dom-module id=content-pages assetpath="ui/"><template><style>
+  </script></dom-module><script>
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '//alotroladodelapagina.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script><dom-module id=expanded-blog-entry assetpath="blog/"><template><style>
+:host > article{display:block;background-color:#fff;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);border:2px solid var(--dark-color);border-radius:5px;margin:1em auto;max-width:1000px;}:host > article header{display:block;padding:2em 2em 1em 2em;}:host > article header h2{color:var(--dark-color);font-size:22px;text-align:justify}:host > article header h5{font-size:13px;color:var(--secondary-color);display:block;text-align:right}:host > article header #more{display:none}:host > article > article-container{display:block}:host > article > footer{display:block;padding:1em}:host #disqus_thread{padding:1em;min-height:100px}@media screen and (min-width:600px){:host{margin-bottom:2em;}:host > article header h2{font-size:30px}:host > article header h5{font-size:16px}}
+</style><article><header><h2>{{model.title}}</h2><h5>{{computedDate}}</h5></header><article-container text={{model.body}}></article-container><footer><template is=dom-repeat items={{model.tags}} as=tag><ui-tag text={{tag}}></ui-tag></template></footer></article><article id=disqus_thread></article></template><script>
+        Polymer({
+            is: 'expanded-blog-entry',
+            properties: {
+                model: {
+                    type: Object,
+                    observer: '_onChange'
+                },
+                err: {
+                    type: Boolean,
+                    value: false
+                },
+                computedDate: {
+                    type: String,
+                    computed: '_computeDate(model.date)'
+                }
+            },
+            _onChange: function () {
+                if (!this.err) {
+                    this._disqus();
+                }
+            },
+            _disqus: function () {
+                var title = this.model.title;
+                if (typeof DISQUS !== 'undefined') {
+                    DISQUS.reset({
+                        reload: true,
+                        config: function () {
+                            this.page.url = window.location.href;
+                            this.page.identifier = title.split(' ').join('_');
+                        }
+                    });
+                }
+            },
+            _computeDate: function (date) {
+                date = new Date(date);
+                var day = date.getDate();
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+                var hours = date.getHours();
+                hours = String(hours).split('').length < 1 ? "00" :
+                    String(hours).split('').length < 2 ? "0" + hours : hours;
+                var minutes = date.getMinutes();
+                minutes = String(minutes).split('').length < 1 ? "00" :
+                    String(minutes).split('').length < 2 ? "0" + minutes : minutes;
+                return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+            }
+        });
+    </script></dom-module><dom-module id=article-section assetpath="sections/"><template><style>
+:host{display:block;padding:1em;margin:0 auto;max-width:1000px}
+</style><iron-ajax id=req handle-as=json on-response=_handleResponse></iron-ajax><expanded-blog-entry model={{model}} err=[[err]]></expanded-blog-entry></template><script>
+        Polymer({
+            is: 'article-section',
+            properties: {
+                article: {
+                    type: String,
+                    value: '',
+                    observer: '_onChange'
+                },
+                model: {
+                    type: Object,
+                    value: function () {
+                        return {
+                            title: 'titulo',
+                            body: '',
+                            tags: [],
+                            date: new Date()
+                        }
+                    }
+                },
+                err: {
+                    type: Boolean,
+                    value: true
+                }
+            },
+            _get: function (title) {
+                let model;
+                if (window.localStorage && (model = window.localStorage.getItem(title))) {
+                    this.model = JSON.parse(model);
+                    this.err = false;
+                } else {
+                    this.$.req.url = '/articles/' + title;
+                    this.$.req.generateRequest();
+                }
+            },
+            _onChange: function (_new) {
+                if (!!_new) {
+                    this._get(_new);
+                }
+            },
+            _handleResponse: function (e, res) {
+                if (!res.response.err) {
+                    if (res.response.article === null) {
+                        this.err = true;
+                        window.location.hash = '#/not-found';
+                    } else {
+                        this.model = res.response.article;
+                        window.localStorage.setItem(
+                            this.model.title.split(' ').join('-'),
+                            JSON.stringify(this.model)
+                        )
+                        this.err = false;
+                    }
+                } else {
+                    this.err = true;
+                    window.location.hash = '#/not-found';
+                }
+            }
+        });
+    </script></dom-module><dom-module id=content-pages assetpath="ui/"><template><style>
 :host{display:block}
-</style><main><app-location route={{route}} use-hash-as-path></app-location><app-route route={{route}} pattern=/:page data={{data}} tail={{tail}}></app-route><iron-pages selected={{page}} attr-for-selected=data-page><home-section data-page></home-section><about-section data-page=about></about-section></iron-pages></main></template><script>
+</style><main><app-location route={{route}} use-hash-as-path></app-location><app-route route={{route}} pattern=/:page data={{data}} tail={{tail}}></app-route><app-route route={{tail}} pattern=/:article data={{article}}></app-route><iron-pages selected={{page}} attr-for-selected=data-page fallback-selection=not-found><home-section data-page></home-section><article-section data-page=blog article={{article.article}}></article-section><about-section data-page=about></about-section><not-found data-page=not-found></not-found></iron-pages></main></template><script>
         Polymer({
             is: "content-pages",
             properties: {
@@ -9769,6 +11124,101 @@ this.fire('dom-change');
                 return typeof data.page !== 'undefined' ? data.page : '';
             }
         });
+    </script></dom-module><dom-module id=ui-stars assetpath="ui/"><template><style>
+            :host {
+                display: block;
+                color: var(--ui-star-void-color, #888);
+            }
+            :host .star {
+                color: var(--ui-star-fill-color, red);
+            }
+        </style><div id=container><span>★</span> <span>★</span> <span>★</span> <span>★</span> <span>★</span></div></template><script>
+        Polymer({
+            is: 'ui-stars',
+            properties: {
+                max: {
+                    type: Number,
+                    value: 5
+                },
+                value: {
+                    type: Number,
+                    value: 0
+                }
+            },
+            ready: function () {
+                let stars = this.$.container.children;
+                Array.prototype.slice.apply(stars).forEach(function (star, i) {
+                    if (i < this.value) {
+                        star.classList.add('star');
+                    }
+                }.bind(this));
+            }
+        });
+    </script></dom-module><dom-module id=book-view assetpath="goodreads/"><template><style>
+:host{display:block;border:2px solid var(--dark-color);background-color:#fff;-webkit-box-shadow:0 2px 3px rgba(0,0,0,0.3);box-shadow:0 2px 3px rgba(0,0,0,0.3);border-radius:5px;overflow:hidden;margin-bottom:1em;}:host article img{width:100%}:host article #info{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;padding:1em;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-orient:vertical;-moz-box-orient:vertical;-o-box-orient:vertical;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-pack:justify;-moz-box-pack:justify;-o-box-pack:justify;-ms-flex-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;}:host article #info hgroup *{display:inline;margin-right:.5em}:host article #info hgroup h4 a:hover{cursor:pointer;text-decoration:underline}:host article #info #review{text-align:justify}@media screen and (min-width:450px){:host article{display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;}:host article img{width:auto;-webkit-box-flex:0;-moz-box-flex:0;-o-box-flex:0;-ms-box-flex:0;box-flex:0;-webkit-flex-grow:0;flex-grow:0;-webkit-flex-shrink:0;flex-shrink:0}:host article #info{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;padding:1em;display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-orient:vertical;-moz-box-orient:vertical;-o-box-orient:vertical;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-pack:justify;-moz-box-pack:justify;-o-box-pack:justify;-ms-flex-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;}:host article #info hgroup *{display:inline;margin-right:.5em}:host article #info #review{text-align:justify}}
+</style><article><img src={{model.image}} alt={{model.title}}><div id=info><hgroup><h4><a href$={{model.link}}>{{model.title}}</a></h4><span>by</span><h5>{{model.author}}</h5></hgroup><div id=review>{{review}}</div><ui-stars id=stars max=5 value={{model.stars}}></ui-stars></div></article></template><script>
+        Polymer({
+            is: 'book-view',
+            properties: {
+                model: Object,
+                max: {
+                    type: Number,
+                    value: 200
+                },
+                review: {
+                    type: String,
+                    computed: 'computeReview(model.review, max)'
+                }
+            },
+            computeReview: function (review, max) {
+                review = review.replace(/<br\/>/g, ' ');
+                review = review.replace(/<br \/>/g, ' ');
+                if (review.length > max) {
+                    return review.slice(0, max) + '...';
+                } else {
+                    return review;
+                }
+            }
+        });
+    </script></dom-module><dom-module id=last-readings assetpath="goodreads/"><template><style>
+@media screen {:host{display:block;color:var(--dark-color);}:host #wrapper{background-color:var(--light-color);border-radius:5px;padding:0 1em;padding-bottom:1em;}:host #wrapper h3{text-align:center;font-size:24px;padding:1em 0}}
+</style><iron-ajax auto url=/last-readings handle-as=json last-response={{readings}}></iron-ajax><div id=wrapper><h3>Últimas lecturas</h3><div><template is=dom-repeat items={{readings}} as=model><book-view model={{model}}></book-view></template></div></div></template><script>
+        Polymer({
+            is: 'last-readings'
+        });
+    </script></dom-module><dom-module id=ui-footer assetpath="ui/"><template><style>
+:host{display:block;font-size:16px;margin-top:1em;background-color:var(--dark-color);padding:1em;padding-top:4em;}:host footer .goodreads{margin-bottom:1em;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3)}:host footer > .wrapper .redes,:host footer > .wrapper .header{-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);background-color:var(--light-color);padding:1em;border-radius:5px;margin-bottom:1em}:host footer > .wrapper .header{font-size:2em;color:var(--dark-color)}:host footer > .wrapper .redes{display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-orient:vertical;-moz-box-orient:vertical;-o-box-orient:vertical;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-align:center;-moz-box-align:center;-o-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;}:host footer > .wrapper .redes ::content ui-addon{margin:16px 0}@media screen and (min-width:700px){:host footer{display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;}:host footer .goodreads{-webkit-box-flex:2;-moz-box-flex:2;-o-box-flex:2;box-flex:2;-webkit-flex:2;-ms-flex:2;flex:2;margin:0 1em}:host footer > .wrapper{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;margin-bottom:0 1em}}
+</style><footer><aside class=goodreads><last-readings></last-readings></aside><div class=wrapper><aside class=redes><content select=.links></content></aside><header class=header><h2>Al otro lado de la página</h2></header></div></footer></template><script>
+        Polymer({
+            is: 'ui-footer'
+        });
+    </script></dom-module><dom-module id=ui-addon assetpath="ui/"><template><style>
+:host{display:inline-block;font-size:0;-webkit-box-shadow:0 0 3px rgba(0,0,0,0.3);box-shadow:0 0 3px rgba(0,0,0,0.3);border-radius:4px;vertical-align:top;}:host #icon,:host #text{font-size:16px;display:inline-block;background-color:var(--ui-addon-span-background-color,#333);color:var(--ui-addon-span-color,#fff);border-top-left-radius:4px;border-bottom-left-radius:4px;border:var(--ui-addon-span-border,none);border-width:var(--ui-addon-span-border-width,0);-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}:host #icon{padding:.5em;}:host #icon:before{width:100%;height:100%}:host #text{height:2em;width:2em;line-height:var(--ui-addon-text-adjust,2em);text-align:center;font-weight:bold}:host a{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;border:var(--ui-addon-link-border,none);border-width:var(--ui-addon-link-border-width,0);font-size:16px;color:var(--ui-addon-link-color,#fff);background-color:var(--ui-addon-link-background-color,#333);display:inline-block;vertical-align:top;height:2em;line-height:2em;padding:0 .5em;border-top-right-radius:4px;border-bottom-right-radius:4px;font-weight:bold;}@apply (--ui-addon-link-hover);@apply (--ui-addon-link-active);
+</style><span id=icon class$={{icon}}></span> <span id=text>{{text}}</span> <a href$={{href}}><content></content></a></template><script>
+        Polymer({
+            is: 'ui-addon',
+            properties: {
+                icon: {
+                    type: String,
+                    value: ""
+                },
+                href: {
+                    type: String,
+                    value: ""
+                },
+                text: {
+                    type: String,
+                    value: ""
+                }
+            },
+            ready: function () {
+                if (!!this.icon) {
+                    this.$.text.style.display = 'none';
+                } else if(!!this.text) {
+                    this.$.icon.style.display = 'none';
+                }
+            }
+        });
     </script></dom-module><style is=custom-style>
 
     :root {
@@ -9776,6 +11226,30 @@ this.fire('dom-change');
         --secondary-color: #ed8c72;
         --dark-color: #2f496e;
         --light-color: #f4eade;
+        --twitter-color: #2988bb;
+
+        --ui-star-fill-color: var(--secondary-color);
+        --ui-star-void-color: var(--dark-color);
+
+        --article-container-color: var(--dark-color);
+        --article-container-bold-color: var(--secondary-color);
+    }
+
+    .twitter {
+        --ui-addon-span-color: var(--dark-color);
+        --ui-addon-span-background-color: white;
+        --ui-addon-link-color: white;
+        --ui-addon-link-background-color: var(--twitter-color);
+    }
+
+    .goodreads {
+        --ui-addon-span-color: #6E3E0C;
+        --ui-addon-span-background-color: #EEEBDB;
+        --ui-addon-link-color: #6E3E0C;
+        --ui-addon-link-background-color: #EEEBDB;
+        --ui-addon-span-border: solid #6E3E0C;
+        --ui-addon-span-border-width: 2px 2px 2px 2px;
+        --ui-addon-text-adjust: 1.6em;
     }
 
 </style></div></body></html>

@@ -3,6 +3,8 @@
 <link rel="import" href="../../../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../sections/home-section.html">
 <link rel="import" href="../sections/about-section.html">
+<link rel="import" href="../sections/article-section.html">
+<link rel="import" href="../sections/not-found.html">
 
 <dom-module id="content-pages">
     <template>
@@ -14,10 +16,19 @@
                 pattern="/:page"
                 data="{{data}}"
                 tail="{{tail}}"></app-route>
+            <app-route
+                route="{{tail}}"
+                pattern="/:article"
+                data="{{article}}"></app-route>
 
-            <iron-pages selected="{{page}}" attr-for-selected="data-page">
-                <home-section data-page=""></home-section>
-                <about-section data-page="about"></about-section>
+            <iron-pages
+                selected="{{page}}"
+                attr-for-selected="data-page"
+                fallback-selection="not-found">
+                    <home-section data-page=""></home-section>
+                    <article-section data-page="blog" article="{{article.article}}"></article-section>
+                    <about-section data-page="about"></about-section>
+                    <not-found data-page="not-found"></not-found>
             </iron-pages>
         </main>
 
