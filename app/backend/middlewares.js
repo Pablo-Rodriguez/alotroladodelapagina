@@ -24,7 +24,7 @@ export default function (rex) {
     rex.load('method-override', methodOverride('_method'));
     rex.load('cookie-parser', cookieParser());
     rex.load('express-session', expressSession({
-      secret: 'secret que hai que cambiar',
+      secret: process.env.EXPRESS_SESSION_SECRET || 'secret que hai que cambiar',
       resave: false,
       saveUninitialized: false
     }));

@@ -46,5 +46,9 @@
     "gulp-vulcanize": "^6.1.0",
     "nib": "^1.1.2",
     "run-sequence": "^1.2.2"
+  },
+  "engines": {
+    "node": "6.2.x"
   }
+
 }

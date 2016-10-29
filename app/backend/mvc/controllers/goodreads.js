@@ -3,7 +3,7 @@ import request from 'request';
 import xml2js from 'xml2js';
 import util from '../../util.js';
 
-let KEY = 'bAhSponNBxgzg41oDZ1rg';
+let KEY = process.env.GOODREADS_KEY || '';
 
 export default class goodreads {
     constructor (rex) {
