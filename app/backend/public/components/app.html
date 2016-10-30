@@ -8147,7 +8147,81 @@ this._children = Polymer.TreeApi.arrayCopyChildNodes(this.root);
 this._insertChildren();
 this.fire('dom-change');
 }
-});</script><script>/**
+});</script><script>
+  'use strict';
+
+  Polymer({
+    is: 'iron-query-params',
+    properties: {
+      paramsString: {
+        type: String,
+        notify: true,
+        observer: 'paramsStringChanged',
+      },
+      paramsObject: {
+        type: Object,
+        notify: true,
+        value: function() {
+          return {};
+        }
+      },
+      _dontReact: {
+        type: Boolean,
+        value: false
+      }
+    },
+    hostAttributes: {
+      hidden: true
+    },
+    observers: [
+      'paramsObjectChanged(paramsObject.*)'
+    ],
+    paramsStringChanged: function() {
+      this._dontReact = true;
+      this.paramsObject = this._decodeParams(this.paramsString);
+      this._dontReact = false;
+    },
+    paramsObjectChanged: function() {
+      if (this._dontReact) {
+        return;
+      }
+      this.paramsString = this._encodeParams(this.paramsObject);
+    },
+    _encodeParams: function(params) {
+      var encodedParams = [];
+      for (var key in params) {
+        var value = params[key];
+        if (value === '') {
+          encodedParams.push(encodeURIComponent(key));
+        } else if (value) {
+          encodedParams.push(
+              encodeURIComponent(key) +
+              '=' +
+              encodeURIComponent(value.toString())
+          );
+        }
+      }
+      return encodedParams.join('&');
+    },
+    _decodeParams: function(paramString) {
+      var params = {};
+
+      // Work around a bug in decodeURIComponent where + is not
+      // converted to spaces:
+      paramString = (paramString || '').replace(/\+/g, '%20');
+
+      var paramList = paramString.split('&');
+      for (var i = 0; i < paramList.length; i++) {
+        var param = paramList[i].split('=');
+        if (param[0]) {
+          params[decodeURIComponent(param[0])] =
+              decodeURIComponent(param[1] || '');
+        }
+      }
+      return params;
+    }
+  });
+</script><script>/**
 @license
 Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
@@ -9223,7 +9297,7 @@ if (!window.Promise) {
             }
         });
     </script></dom-module><dom-module id=ui-tag assetpath="ui/"><template><style>
-:host{display:inline-block;background-color:var(--secondary-color);color:#fff;padding:.4em;margin:.3em .4em;border-radius:4px}
+:host{display:inline-block;cursor:pointer;background-color:var(--secondary-color);color:#fff;padding:.4em;margin:.3em .4em;border-radius:4px;}:host:hover{-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3)}
 </style><span>#{{text}}</span></template><script>
         Polymer({
             is: 'ui-tag',
@@ -9233,7 +9307,7 @@ if (!window.Promise) {
         });
     </script></dom-module><dom-module id=blog-entry assetpath="blog/"><template><style>
 :host{display:block;background-color:#fff;padding:1em;padding-right:0;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);border:2px solid var(--dark-color);border-radius:5px;margin:1em auto;max-width:1000px;}:host > article header{display:-webkit-box;display:-moz-box;display:-webkit-flex;display:-ms-flexbox;display:box;display:flex;-webkit-box-align:center;-moz-box-align:center;-o-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:justify;-moz-box-pack:justify;-o-box-pack:justify;-ms-flex-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;}:host > article header h2{cursor:pointer;color:var(--dark-color);font-size:16px;-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;text-align:justify}:host > article header h5{display:none}:host > article header #more{-webkit-box-flex:1;-moz-box-flex:1;-o-box-flex:1;box-flex:1;-webkit-flex:0 0 20%;-ms-flex:0 0 20%;flex:0 0 20%;text-align:center;}:host > article header #more span{cursor:pointer;background-color:var(--secondary-color);color:var(--light-color);border-radius:1000px;-webkit-box-shadow:0 2px 3px rgba(0,0,0,0.3);box-shadow:0 2px 3px rgba(0,0,0,0.3);font-size:170%;padding:.2em;display:block;margin:0 auto;width:1em;height:1em;}:host > article header #more span:hover{-webkit-box-shadow:0 2px 6px rgba(0,0,0,0.3);box-shadow:0 2px 6px rgba(0,0,0,0.3)}:host > article header #more span:active{-webkit-box-shadow:0 2px 1px rgba(0,0,0,0.3);box-shadow:0 2px 1px rgba(0,0,0,0.3)}:host > article > article-container{display:none}:host > article > footer{display:none}@media screen and (min-width:600px){:host{padding:0;margin-bottom:2em;}:host > article header{display:block;padding:2em 2em 1em 2em;}:host > article header h2{font-size:30px;}:host > article header h2:hover{color:var(--secondary-color)}:host > article header h5{font-size:16px;color:var(--secondary-color);display:block;text-align:right}:host > article header #more{display:none}:host > article > article-container{display:block}:host > article > footer{display:block;padding:1em}}
-</style><article><header><h2 on-click=_navigate>{{model.title}}</h2><h5>{{computedDate}}</h5><div id=more><span class=icon-eye on-click=_navigate></span></div></header><article-container text={{model.body}}></article-container><footer><template is=dom-repeat items={{model.tags}} as=tag><ui-tag text={{tag}}></ui-tag></template></footer></article></template><script>
+</style><article><header><h2 on-click=_navigate>{{model.title}}</h2><h5>{{computedDate}}</h5><div id=more><span class=icon-eye on-click=_navigate></span></div></header><article-container text={{model.body}}></article-container><footer><template is=dom-repeat items={{model.tags}} as=tag><ui-tag text={{tag}} on-click=_handleClick></ui-tag></template></footer></article></template><script>
         Polymer({
             is: 'blog-entry',
             properties: {
@@ -9258,6 +9332,11 @@ if (!window.Promise) {
                 minutes = String(minutes).split('').length < 1 ? "00" :
                     String(minutes).split('').length < 2 ? "0" + minutes : minutes;
                 return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+            },
+            _handleClick: function (e) {
+                var model = e.model;
+                var text = window.encodeURIComponent(model.get('tag').split(' ').join('-'));
+                window.location.hash = '#/?tag=' + text;
             }
         });
     </script></dom-module><dom-module id=ui-pagination assetpath="ui/"><template><style>
@@ -9338,7 +9417,7 @@ if (!window.Promise) {
         });
     </script></dom-module><dom-module id=home-section assetpath="sections/"><template><style>
 :host{display:block;font-size:16px}
-</style><iron-ajax auto url=/articles params={{params}} handle-as=json last-response={{response}}></iron-ajax><section><template is=dom-if if={{!response.err}} restamp=true><blog-container data={{response.articles}} page={{page}} more={{response.more}} on-lclick=_leftClick on-rclick=_rightClick></blog-container></template><template is=dom-if if={{response.err}} restamp=true><not-found></not-found></template></section></template><script>
+</style><iron-query-params params-string={{queryString}} params-object={{query}}></iron-query-params><iron-ajax auto url=/articles params={{params}} handle-as=json last-response={{response}} on-response=_handleResponse></iron-ajax><section><template is=dom-if if={{!response.err}} restamp=true><blog-container data={{response.articles}} page={{page}} more={{response.more}} on-lclick=_leftClick on-rclick=_rightClick></blog-container></template><template is=dom-if if={{response.err}} restamp=true><not-found></not-found></template></section></template><script>
         Polymer({
             is: 'home-section',
             properties: {
@@ -9356,12 +9435,16 @@ if (!window.Promise) {
                     type: Number,
                     value: 0
                 },
+                query: {
+                    type: Object,
+                    value: function () {return {};}
+                },
                 params: {
                     type: Object,
                     value: function () {
                         return {};
                     },
-                    computed: '_computeParams(page)'
+                    computed: '_computeParams(page, query)'
                 }
             },
             _onChange: function () {
@@ -9376,10 +9459,14 @@ if (!window.Promise) {
                     }
                 }
             },
-            _computeParams: function (page) {
-                return {
-                    'page': page
-                };
+            _handleResponse: function (err, res) {
+                if (res.status === 200 && !res.response.err && res.response.articles.length === 0) {
+                    window.location.hash = '#/not-found'
+                }
+            },
+            _computeParams: function (page, query) {
+                query.page = page;
+                return query;
             },
             _leftClick: function () {
                 this.page--;
@@ -9680,80 +9767,6 @@ if (!window.Promise) {
       }
     });
   })();
-</script><script>
-  'use strict';
-
-  Polymer({
-    is: 'iron-query-params',
-    properties: {
-      paramsString: {
-        type: String,
-        notify: true,
-        observer: 'paramsStringChanged',
-      },
-      paramsObject: {
-        type: Object,
-        notify: true,
-        value: function() {
-          return {};
-        }
-      },
-      _dontReact: {
-        type: Boolean,
-        value: false
-      }
-    },
-    hostAttributes: {
-      hidden: true
-    },
-    observers: [
-      'paramsObjectChanged(paramsObject.*)'
-    ],
-    paramsStringChanged: function() {
-      this._dontReact = true;
-      this.paramsObject = this._decodeParams(this.paramsString);
-      this._dontReact = false;
-    },
-    paramsObjectChanged: function() {
-      if (this._dontReact) {
-        return;
-      }
-      this.paramsString = this._encodeParams(this.paramsObject);
-    },
-    _encodeParams: function(params) {
-      var encodedParams = [];
-      for (var key in params) {
-        var value = params[key];
-        if (value === '') {
-          encodedParams.push(encodeURIComponent(key));
-        } else if (value) {
-          encodedParams.push(
-              encodeURIComponent(key) +
-              '=' +
-              encodeURIComponent(value.toString())
-          );
-        }
-      }
-      return encodedParams.join('&');
-    },
-    _decodeParams: function(paramString) {
-      var params = {};
-
-      // Work around a bug in decodeURIComponent where + is not
-      // converted to spaces:
-      paramString = (paramString || '').replace(/\+/g, '%20');
-
-      var paramList = paramString.split('&');
-      for (var i = 0; i < paramList.length; i++) {
-        var param = paramList[i].split('=');
-        if (param[0]) {
-          params[decodeURIComponent(param[0])] =
-              decodeURIComponent(param[1] || '');
-        }
-      }
-      return params;
-    }
-  });
 </script><script>
   'use strict';
 
@@ -10292,6 +10305,14 @@ if (!window.Promise) {
             is: 'my-header'
         });
     </script></dom-module><script>
+  'use strict';
+
+  Polymer({
+    is: 'app-route-converter',
+
+    behaviors: [Polymer.AppRouteConverterBehavior]
+  });
+</script><script>
   /**
    * `IronResizableBehavior` is a behavior that can be used in Polymer elements to
    * coordinate the flow of resize events between "resizers" (elements that control the
@@ -11000,7 +11021,7 @@ if (!window.Promise) {
     })();
 </script><dom-module id=expanded-blog-entry assetpath="blog/"><template><style>
 :host > article{display:block;background-color:#fff;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);border:2px solid var(--dark-color);border-radius:5px;margin:1em auto;max-width:1000px;}:host > article header{display:block;padding:2em 2em 1em 2em;}:host > article header h2{color:var(--dark-color);font-size:22px;text-align:justify}:host > article header h5{font-size:13px;color:var(--secondary-color);display:block;text-align:right}:host > article header #more{display:none}:host > article > article-container{display:block}:host > article > footer{display:block;padding:1em}:host #disqus_thread{padding:1em;min-height:100px}@media screen and (min-width:600px){:host{margin-bottom:2em;}:host > article header h2{font-size:30px}:host > article header h5{font-size:16px}}
-</style><article><header><h2>{{model.title}}</h2><h5>{{computedDate}}</h5></header><article-container text={{model.body}}></article-container><footer><template is=dom-repeat items={{model.tags}} as=tag><ui-tag text={{tag}}></ui-tag></template></footer></article><article id=disqus_thread></article></template><script>
+</style><article><header><h2>{{model.title}}</h2><h5>{{computedDate}}</h5></header><article-container text={{model.body}}></article-container><footer><template is=dom-repeat items={{model.tags}} as=tag><ui-tag text={{tag}} on-click=_handleClick></ui-tag></template></footer></article><article id=disqus_thread></article></template><script>
         Polymer({
             is: 'expanded-blog-entry',
             properties: {
@@ -11046,6 +11067,11 @@ if (!window.Promise) {
                 minutes = String(minutes).split('').length < 1 ? "00" :
                     String(minutes).split('').length < 2 ? "0" + minutes : minutes;
                 return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+            },
+            _handleClick: function (e) {
+                var model = e.model;
+                var text = window.encodeURIComponent(model.get('tag').split(' ').join('-'));
+                window.location.hash = '#/?tag=' + text;
             }
         });
     </script></dom-module><dom-module id=article-section assetpath="sections/"><template><style>
@@ -11111,17 +11137,35 @@ if (!window.Promise) {
         });
     </script></dom-module><dom-module id=content-pages assetpath="ui/"><template><style>
 :host{display:block}
-</style><main><app-location route={{route}} use-hash-as-path></app-location><app-route route={{route}} pattern=/:page data={{data}} tail={{tail}}></app-route><app-route route={{tail}} pattern=/:article data={{article}}></app-route><iron-pages selected={{page}} attr-for-selected=data-page fallback-selection=not-found><home-section data-page></home-section><article-section data-page=blog article={{article.article}}></article-section><about-section data-page=about></about-section><not-found data-page=not-found></not-found></iron-pages></main></template><script>
+</style><main><iron-location hash={{path}} use-hash-as-path></iron-location><app-route-converter path={{computedPath}} query-params={} route={{route}}></app-route-converter><app-route route={{route}} pattern=/:page data={{data}} tail={{tail}}></app-route><app-route route={{tail}} pattern=/:article data={{article}}></app-route><iron-pages selected={{page}} attr-for-selected=data-page fallback-selection=not-found><home-section data-page query-string={{params}}></home-section><article-section data-page=blog article={{article.article}}></article-section><about-section data-page=about></about-section><not-found data-page=not-found></not-found></iron-pages></main></template><script>
         Polymer({
             is: "content-pages",
             properties: {
                 page: {
                     type: String,
                     computed: '_computePage(data)'
+                },
+                path: {
+                    type: String,
+                    value: '',
+                    observer: '_onPathChange'
+                },
+                computedPath: {
+                    type: String,
+                    value: ''
+                },
+                params: {
+                    type: String,
+                    value: ''
                 }
             },
             _computePage: function (data) {
                 return typeof data.page !== 'undefined' ? data.page : '';
+            },
+            _onPathChange: function () {
+                let arr = this.path.split('?')
+                this.computedPath = arr[0] || '';
+                this.params = arr[1] || '';
             }
         });
     </script></dom-module><dom-module id=ui-stars assetpath="ui/"><template><style>

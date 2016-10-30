@@ -17,11 +17,21 @@ export default {
                 .sort({date: 'descending'});
     },
 
+    getTag (tag='', page=0, limit=0) {
+        return Schema.find()
+                .where('tags')
+                .in([tag])
+                .skip(page*limit)
+                .limit(limit)
+                .sort({date: 'descending'});
+    },
+
     // End-points
-    getPaginated (page=0, limit=5) {
+    getPaginated (page=0, limit=5, tag='') {
         page = Number(page);
         limit = Number(limit);
-        let articles = this.get(page, limit);
+        let articles = !!tag ? this.getTag(tag.split('-').join(' '), page, limit)
+                            : this.get(page, limit);
         let more = this.more(page, limit);
         return Promise.all([articles, more]);
     },

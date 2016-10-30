@@ -13,7 +13,7 @@ export default class home {
     }
 
     get (req, res) {
-        model.getPaginated(req.query.page, req.query.limit)
+        model.getPaginated(req.query.page, req.query.limit, req.query.tag)
             .then((promises) => res.json({err: false, articles: promises[0], more: promises[1]}))
             .catch(util.error(res, errorMsg.blog.get));
     }
