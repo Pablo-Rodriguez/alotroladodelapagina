@@ -9337,6 +9337,7 @@ if (!window.Promise) {
                 var model = e.model;
                 var text = window.encodeURIComponent(model.get('tag').split(' ').join('-'));
                 window.location.hash = '#/?tag=' + text;
+                window.scrollTo(0, 0);
             }
         });
     </script></dom-module><dom-module id=ui-pagination assetpath="ui/"><template><style>
@@ -9461,7 +9462,8 @@ if (!window.Promise) {
             },
             _handleResponse: function (err, res) {
                 if (res.status === 200 && !res.response.err && res.response.articles.length === 0) {
-                    window.location.hash = '#/not-found'
+                    window.location.hash = '#/not-found';
+                    window.scrollTo(0, 0);
                 }
             },
             _computeParams: function (page, query) {
@@ -11072,6 +11074,7 @@ if (!window.Promise) {
                 var model = e.model;
                 var text = window.encodeURIComponent(model.get('tag').split(' ').join('-'));
                 window.location.hash = '#/?tag=' + text;
+                window.scrollTo(0, 0);
             }
         });
     </script></dom-module><dom-module id=article-section assetpath="sections/"><template><style>

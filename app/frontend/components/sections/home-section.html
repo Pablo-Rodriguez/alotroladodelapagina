@@ -76,6 +76,7 @@
             _handleResponse: function (err, res) {
                 if (res.status === 200 && !res.response.err && res.response.articles.length === 0) {
                     window.location.hash = '#/not-found';
+                    window.scrollTo(0, 0);
                 }
             },
             _computeParams: function (page, query) {

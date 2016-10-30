@@ -51,6 +51,7 @@
                 var model = e.model;
                 var text = window.encodeURIComponent(model.get('tag').split(' ').join('-'));
                 window.location.hash = '#/?tag=' + text;
+                window.scrollTo(0, 0);
             }
         });
     </script>
