@@ -32,7 +32,8 @@
                 }
             },
             _navigate: function () {
-                window.location.hash = '#/blog/' + String(this.model.title).split(' ').join('-');
+                window.location.hash = '#/blog/' + window.encodeURIComponent(
+                        String(this.model.title).split(' ').join('-'));
             },
             _computeDate: function (date) {
                 date = new Date(date);

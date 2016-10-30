@@ -38,6 +38,7 @@
                 }
             },
             _get: function (title) {
+                title = window.decodeURIComponent(title);
                 let model;
                 if (window.localStorage && (model = window.localStorage.getItem(title))) {
                     this.model = JSON.parse(model);

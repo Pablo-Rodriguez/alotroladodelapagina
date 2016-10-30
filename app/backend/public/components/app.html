@@ -9318,7 +9318,8 @@ if (!window.Promise) {
                 }
             },
             _navigate: function () {
-                window.location.hash = '#/blog/' + String(this.model.title).split(' ').join('-');
+                window.location.hash = '#/blog/' + window.encodeURIComponent(
+                        String(this.model.title).split(' ').join('-'));
             },
             _computeDate: function (date) {
                 date = new Date(date);
@@ -11105,6 +11106,7 @@ if (!window.Promise) {
                 }
             },
             _get: function (title) {
+                title = window.decodeURIComponent(title);
                 let model;
                 if (window.localStorage && (model = window.localStorage.getItem(title))) {
                     this.model = JSON.parse(model);
