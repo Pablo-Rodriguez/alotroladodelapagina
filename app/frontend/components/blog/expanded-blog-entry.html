@@ -43,24 +43,22 @@
                 }
             },
             ready: function () {
-                console.log('ready')
-                this._disqus();
+                var title = this.model.title;
+                window.disqus_config = function () {
+                    this.page.url = window.location.href;
+                    this.page.identifier = title.split(' ').join('_');
+                };
             },
             _onChange: function () {
                 this._disqus();
             },
             _disqus: function () {
-                console.log('disqus')
                 if (!(this.model.body === 'err')) {
-                    console.log('cambiar')
                     var title = this.model.title;
-                    console.log(title)
                     if (typeof DISQUS !== 'undefined') {
                         DISQUS.reset({
                             reload: true,
                             config: function () {
-                                console.log(window.location.href);
-                                console.log(title.split(' ').join('_'));
                                 this.page.url = window.location.href;
                                 this.page.identifier = title.split(' ').join('_');
                             }
