@@ -11038,14 +11038,18 @@ if (!window.Promise) {
                 }
             },
             ready: function () {
+                console.log('ready')
                 this._disqus();
             },
             _onChange: function () {
                 this._disqus();
             },
             _disqus: function () {
+                console.log('disqus')
                 if (!(this.model.body === 'err')) {
+                    console.log('cambiar')
                     var title = this.model.title;
+                    console.log(title)
                     if (typeof DISQUS !== 'undefined') {
                         DISQUS.reset({
                             reload: true,
