@@ -10,7 +10,7 @@
             id="req"
             handle-as="json"
             on-response="_handleResponse"></iron-ajax>
-        <expanded-blog-entry model="{{model}}" err="[[err]]"></expanded-blog-entry>
+        <expanded-blog-entry model="{{model}}"></expanded-blog-entry>
     </template>
     <script>
         Polymer({
@@ -26,15 +26,11 @@
                     value: function () {
                         return {
                             title: 'titulo',
-                            body: '',
+                            body: 'err',
                             tags: [],
                             date: new Date()
                         }
                     }
-                },
-                err: {
-                    type: Boolean,
-                    value: true
                 }
             },
             _get: function (title) {
@@ -42,7 +38,6 @@
                 let model;
                 if (window.localStorage && (model = window.localStorage.getItem(title))) {
                     this.model = JSON.parse(model);
-                    this.err = false;
                 } else {
                     this.$.req.url = '/articles/' + title;
                     this.$.req.generateRequest();
@@ -56,7 +51,6 @@
             _handleResponse: function (e, res) {
                 if (!res.response.err) {
                     if (res.response.article === null) {
-                        this.err = true;
                         window.location.hash = '#/not-found';
                     } else {
                         this.model = res.response.article;
@@ -64,10 +58,8 @@
                             this.model.title.split(' ').join('-'),
                             JSON.stringify(this.model)
                         )
-                        this.err = false;
                     }
                 } else {
-                    this.err = true;
                     window.location.hash = '#/not-found';
                 }
             }

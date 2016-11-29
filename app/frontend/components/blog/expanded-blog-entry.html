@@ -37,30 +37,31 @@
                     type: Object,
                     observer: '_onChange'
                 },
-                err: {
-                    type: Boolean,
-                    value: false
-                },
                 computedDate: {
                     type: String,
                     computed: '_computeDate(model.date)'
                 }
             },
+            ready: function () {
+                this._disqus();
+            },
             _onChange: function () {
-                if (!this.err) {
-                    this._disqus();
-                }
+                this._disqus();
             },
             _disqus: function () {
-                var title = this.model.title;
-                if (typeof DISQUS !== 'undefined') {
-                    DISQUS.reset({
-                        reload: true,
-                        config: function () {
-                            this.page.url = window.location.href;
-                            this.page.identifier = title.split(' ').join('_');
-                        }
-                    });
+                if (!(this.model.body === 'err')) {
+                    var title = this.model.title;
+                    if (typeof DISQUS !== 'undefined') {
+                        DISQUS.reset({
+                            reload: true,
+                            config: function () {
+                                console.log(window.location.href);
+                                console.log(title.split(' ').join('_'));
+                                this.page.url = window.location.href;
+                                this.page.identifier = title.split(' ').join('_');
+                            }
+                        });
+                    }
                 }
             },
             _computeDate: function (date) {

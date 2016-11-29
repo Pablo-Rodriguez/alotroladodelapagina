@@ -11032,30 +11032,31 @@ if (!window.Promise) {
                     type: Object,
                     observer: '_onChange'
                 },
-                err: {
-                    type: Boolean,
-                    value: false
-                },
                 computedDate: {
                     type: String,
                     computed: '_computeDate(model.date)'
                 }
             },
+            ready: function () {
+                this._disqus();
+            },
             _onChange: function () {
-                if (!this.err) {
-                    this._disqus();
-                }
+                this._disqus();
             },
             _disqus: function () {
-                var title = this.model.title;
-                if (typeof DISQUS !== 'undefined') {
-                    DISQUS.reset({
-                        reload: true,
-                        config: function () {
-                            this.page.url = window.location.href;
-                            this.page.identifier = title.split(' ').join('_');
-                        }
-                    });
+                if (!(this.model.body === 'err')) {
+                    var title = this.model.title;
+                    if (typeof DISQUS !== 'undefined') {
+                        DISQUS.reset({
+                            reload: true,
+                            config: function () {
+                                console.log(window.location.href);
+                                console.log(title.split(' ').join('_'));
+                                this.page.url = window.location.href;
+                                this.page.identifier = title.split(' ').join('_');
+                            }
+                        });
+                    }
                 }
             },
             _computeDate: function (date) {
@@ -11080,7 +11081,7 @@ if (!window.Promise) {
         });
     </script></dom-module><dom-module id=article-section assetpath="sections/"><template><style>
 :host{display:block;padding:1em;margin:0 auto;max-width:1000px}
-</style><iron-ajax id=req handle-as=json on-response=_handleResponse></iron-ajax><expanded-blog-entry model={{model}} err=[[err]]></expanded-blog-entry></template><script>
+</style><iron-ajax id=req handle-as=json on-response=_handleResponse></iron-ajax><expanded-blog-entry model={{model}}></expanded-blog-entry></template><script>
         Polymer({
             is: 'article-section',
             properties: {
@@ -11094,15 +11095,11 @@ if (!window.Promise) {
                     value: function () {
                         return {
                             title: 'titulo',
-                            body: '',
+                            body: 'err',
                             tags: [],
                             date: new Date()
                         }
                     }
-                },
-                err: {
-                    type: Boolean,
-                    value: true
                 }
             },
             _get: function (title) {
@@ -11110,7 +11107,6 @@ if (!window.Promise) {
                 let model;
                 if (window.localStorage && (model = window.localStorage.getItem(title))) {
                     this.model = JSON.parse(model);
-                    this.err = false;
                 } else {
                     this.$.req.url = '/articles/' + title;
                     this.$.req.generateRequest();
@@ -11124,7 +11120,6 @@ if (!window.Promise) {
             _handleResponse: function (e, res) {
                 if (!res.response.err) {
                     if (res.response.article === null) {
-                        this.err = true;
                         window.location.hash = '#/not-found';
                     } else {
                         this.model = res.response.article;
@@ -11132,10 +11127,8 @@ if (!window.Promise) {
                             this.model.title.split(' ').join('-'),
                             JSON.stringify(this.model)
                         )
-                        this.err = false;
                     }
                 } else {
-                    this.err = true;
                     window.location.hash = '#/not-found';
                 }
             }
