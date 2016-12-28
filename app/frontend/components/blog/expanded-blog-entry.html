@@ -36,8 +36,6 @@
             },
             ready: function () {
                 var title = this.model.title;
-                console.log("Primera vez");
-                console.log(title);
                 var disqus_config = function () {
                     this.page.url = 'http://alotroladodelapagina.herokuapp.com/'
                         + title.split(' ').join('_');
@@ -56,12 +54,9 @@
                 this._disqus();
             },
             _disqus: function () {
-                console.log("reload-fora");
                 if (!(this.model.body === 'err')) {
                     var title = this.model.title;
-                    console.log("sen err")
                     if (typeof DISQUS !== 'undefined') {
-                        console.log("disqus ben")
                         DISQUS.reset({
                             reload: true,
                             config: function () {
@@ -69,11 +64,9 @@
                                     + title.split(' ').join('_');
                                 this.page.identifier = title.split(' ').join('_');
                                 this.page.title = title;
-                                console.log("reload con ", this.page.url, this.page.identifier);
                             }
                         });
                     } else {
-                        console.log("disqus mal -> timeout")
                         window.setTimeout(this._disqus.bind(this), 1000);
                     }
                 }
