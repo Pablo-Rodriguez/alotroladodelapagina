@@ -1,12 +1,4 @@
 <link rel="import" href="../../../../bower_components/polymer/polymer.html">
-<script>
-    (function() { // DON'T EDIT BELOW THIS LINE
-        var d = document, s = d.createElement('script');
-        s.src = '//alotroladodelapagina.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
 <link rel="import" href="../ui/article-container.html">
 <link rel="import" href="../ui/ui-tag.html">
 
@@ -46,10 +38,19 @@
                 var title = this.model.title;
                 console.log("Primera vez");
                 console.log(title);
-                window.disqus_config = function () {
-                    this.page.url = window.location.host + '/' + title;
+                var disqus_config = function () {
+                    this.page.url = 'http://alotroladodelapagina.herokuapp.com/'
+                        + title.split(' ').join('_');
                     this.page.identifier = title.split(' ').join('_');
+                    this.page.title = title;
                 };
+                window.disqus_config = disqus_config;
+                (function() { // DON'T EDIT BELOW THIS LINE
+                    var d = document, s = d.createElement('script');
+                    s.src = '//alotroladodelapagina.disqus.com/embed.js';
+                    s.setAttribute('data-timestamp', +new Date());
+                    (d.head || d.body).appendChild(s);
+                })();
             },
             _onChange: function () {
                 this._disqus();
@@ -64,8 +65,10 @@
                         DISQUS.reset({
                             reload: true,
                             config: function () {
-                                this.page.url = window.location.host + '/' + title;
+                                this.page.url = 'http://alotroladodelapagina.herokuapp.com/'
+                                    + title.split(' ').join('_');
                                 this.page.identifier = title.split(' ').join('_');
+                                this.page.title = title;
                                 console.log("reload con ", this.page.url, this.page.identifier);
                             }
                         });

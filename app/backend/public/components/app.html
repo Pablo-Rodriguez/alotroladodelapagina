@@ -11015,14 +11015,7 @@ if (!window.Promise) {
       }
     });
 
-  </script></dom-module><script>
-    (function() { // DON'T EDIT BELOW THIS LINE
-        var d = document, s = d.createElement('script');
-        s.src = '//alotroladodelapagina.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script><dom-module id=expanded-blog-entry assetpath="blog/"><template><style>
+  </script></dom-module><dom-module id=expanded-blog-entry assetpath="blog/"><template><style>
 :host > article{display:block;background-color:#fff;-webkit-box-shadow:0 0 5px rgba(0,0,0,0.3);box-shadow:0 0 5px rgba(0,0,0,0.3);border:2px solid var(--dark-color);border-radius:5px;margin:1em auto;max-width:1000px;}:host > article header{display:block;padding:2em 2em 1em 2em;}:host > article header h2{color:var(--dark-color);font-size:22px;text-align:justify}:host > article header h5{font-size:13px;color:var(--secondary-color);display:block;text-align:right}:host > article header #more{display:none}:host > article > article-container{display:block}:host > article > footer{display:block;padding:1em}:host #disqus_thread{padding:1em;min-height:100px}@media screen and (min-width:600px){:host{margin-bottom:2em;}:host > article header h2{font-size:30px}:host > article header h5{font-size:16px}}
 </style><article><header><h2>{{model.title}}</h2><h5>{{computedDate}}</h5></header><article-container text={{model.body}}></article-container><footer><template is=dom-repeat items={{model.tags}} as=tag><ui-tag text={{tag}} on-click=_handleClick></ui-tag></template></footer></article><article id=disqus_thread></article></template><script>
         Polymer({
@@ -11041,10 +11034,19 @@ if (!window.Promise) {
                 var title = this.model.title;
                 console.log("Primera vez");
                 console.log(title);
-                window.disqus_config = function () {
-                    this.page.url = window.location.host + '/' + title;
+                var disqus_config = function () {
+                    this.page.url = 'http://alotroladodelapagina.herokuapp.com/'
+                        + title.split(' ').join('_');
                     this.page.identifier = title.split(' ').join('_');
+                    this.page.title = title;
                 };
+                window.disqus_config = disqus_config;
+                (function() { // DON'T EDIT BELOW THIS LINE
+                    var d = document, s = d.createElement('script');
+                    s.src = '//alotroladodelapagina.disqus.com/embed.js';
+                    s.setAttribute('data-timestamp', +new Date());
+                    (d.head || d.body).appendChild(s);
+                })();
             },
             _onChange: function () {
                 this._disqus();
@@ -11059,8 +11061,10 @@ if (!window.Promise) {
                         DISQUS.reset({
                             reload: true,
                             config: function () {
-                                this.page.url = window.location.host + '/' + title;
+                                this.page.url = 'http://alotroladodelapagina.herokuapp.com/'
+                                    + title.split(' ').join('_');
                                 this.page.identifier = title.split(' ').join('_');
+                                this.page.title = title;
                                 console.log("reload con ", this.page.url, this.page.identifier);
                             }
                         });
