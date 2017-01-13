@@ -27,7 +27,7 @@ export default {
     },
 
     // End-points
-    getPaginated (page=0, limit=5, tag='') {
+    getPaginated (page=0, limit=10, tag='') {
         page = Number(page);
         limit = Number(limit);
         let articles = !!tag ? this.getTag(tag.split('-').join(' '), page, limit)
