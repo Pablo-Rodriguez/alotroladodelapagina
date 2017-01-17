@@ -21,6 +21,7 @@
     "iron-pages": "PolymerElements/iron-pages#^1.0.0",
     "iron-selector": "PolymerElements/iron-selector#^1.0.0",
     "iron-ajax": "PolymerElements/iron-ajax#^1.0.0",
-    "iron-localstorage": "PolymerElements/iron-localstorage#^1.0.0"
+    "iron-localstorage": "PolymerElements/iron-localstorage#^1.0.0",
+    "google-analytics": "^0.2.0"
   }
 }
