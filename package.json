@@ -37,18 +37,13 @@
     "morgan": "^1.7.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
-    "pug": "^2.0.0-beta6",
     "request": "^2.75.0",
     "rexpress": "^0.1.0",
     "xml2js": "^0.4.17"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-minify-html": "^1.0.6",
-    "gulp-stylus": "^2.5.0",
-    "gulp-vulcanize": "^6.1.0",
-    "nib": "^1.1.2",
-    "run-sequence": "^1.2.2"
+    "gulp-minify-html": "^1.0.6"
   },
   "engines": {
     "node": "6.2.x"

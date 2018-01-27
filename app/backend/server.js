@@ -1,33 +1,30 @@
 
+import http from 'http'
+import express from 'express'
+import Rex from 'rexpress'
+import mongoose from 'mongoose'
+import middlewares from './middlewares'
+import controllers from './controllers'
+
 import config from './config'
 
-import http from 'http';
-import express from 'express';
-import Rex from 'rexpress';
-import mongoose from 'mongoose';
-import middlewares from './middlewares';
-import controllers from './controllers';
+const router = express()
+const app = new Rex(router)
+const server = http.createServer(router)
 
-const router = express();
-const app = new Rex(router);
-const server = http.createServer(router);
+const port = process.env.PORT || config.port
 
-const port = process.env.PORT || config.port;
+app.setMiddlewares(middlewares)
+app.setControllers(controllers)
 
-app.setMiddlewares(middlewares);
-app.setControllers(controllers);
+mongoose.Promise = global.Promise
 
-mongoose.Promise = global.Promise;
-
-config.db(process.env.ENV_CHOICE)
+config.db(process.env.NODE_ENV)
 	.then((db) => {
-		mongoose.connect(db, function (err) {
-			if(err){
-				console.log("ERROR: " + err);
-			}else{
-				console.log("Conexion a BD con exito");
-			}
-		});
-	});
+		return mongoose.connect(db, {useMongoClient: true})
+  })
+  .then(() => console.log('Conexion a BD con exito'))
+  .catch((err) => console.log(`ERROR: ${err}`))
 
-server.listen(port, () => console.log('todo correcto'));
+server.listen(port, () => console.log(`Magic on ${port}`))
+
