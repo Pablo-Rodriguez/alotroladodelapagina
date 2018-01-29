@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="charset" content="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,user-scalable=yes">
+    
+    <title>Al otro lado de la página</title>
+    <script>
+      window.ShadyDOM = {force: true};
+      //window.ShadyCSS = {shimcssproperties: true};
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.1.0/custom-elements-es5-adapter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.1.0/webcomponents-lite.js"></script>
+    <link rel="stylesheet" href="app.css">
+    <link href="//fonts.googleapis.com/css?family=Capriola|Lustria" rel="stylesheet">
+  </head>
+  <body>
+    <aolp-header></aolp-header>
+    <aolp-main></aolp-main>
+    <aolp-footer></aolp-footer>
+    <script src="bundle.js"></script>
+  </body>
+</html>

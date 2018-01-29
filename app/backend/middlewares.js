@@ -32,7 +32,7 @@ export default function (rex) {
   rex.load('passport-session', passport.session())
   rex.load('auth', auth('/#/'))
   rex.load('admin', admin('/#/'))
-  rex.load('static', root)
+  rex.load('static', express.static(root))
   rex.load('history-api-fallback', fallback('index.html', {root}))
 
   rex.use('morgan')
