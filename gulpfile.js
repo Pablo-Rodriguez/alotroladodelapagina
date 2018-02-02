@@ -1,72 +1,60 @@
-var gulp = require('gulp'),
-	//browserify = require('browserify'),
-	//source = require('vinyl-source-stream'),
-	//buffer = require('vinyl-buffer'),
-	//uglify = require('gulp-uglify'),
-	stylus = require('gulp-stylus'),
-	nib = require('nib'),
-    vulcanize = require('gulp-vulcanize'),
-	minifyHTML = require('gulp-minify-html'),
-	sequence = require('run-sequence');
 
-gulp.task('components', function () {
-  return gulp.src('./app/frontend/components/*.html')
-    .pipe(vulcanize({
-		inlineScripts: true,
-		inlineCss: true
-    }))
-    .pipe(minifyHTML())
-    .pipe(gulp.dest('./app/backend/public/components/'));
-});
+const gulp = require('gulp')
+const browserify = require('browserify')
+const source = require('vinyl-source-stream')
+const buffer = require('vinyl-buffer')
+const uglify = require('gulp-uglify-es').default
+const stylus = require('gulp-stylus')
+const nib = require('nib')
+const minifyHTML = require('gulp-htmlmin')
 
-gulp.task('stylus-components', function () {
-	return gulp.src('./app/frontend/stylus/components/*.styl')
-    .pipe(stylus({
-      compress: true,
-      use: [nib()]
-    }))
-    .pipe(gulp.dest('./app/frontend/css/'));
-});
-
-gulp.task('stylus-globals', function () {
-  return gulp.src('./app/frontend/stylus/*.styl')
-    .pipe(stylus({
-      compress: true,
-      use: [nib()]
-    }))
-    .pipe(gulp.dest('./app/backend/public/css/'));
-});
-
-gulp.task('build', function () {
-  return sequence(['stylus-globals', 'stylus-components'], 'components');
-});
-
-/*gulp.task('js', function () {
-	return browserify({
-    entries: 'app/frontend/js/index.js',
-    debug: true
-  }).transform('babelify', {presets: ['es2015']}).bundle()
-    .pipe(source('index.js'))
+function browserifyOrigin (entries, name, output) {
+  let base = browserify({
+    entries: entries
+  })
+    .transform('babelify')
+    .bundle()
+    .pipe(source(name))
     .pipe(buffer())
-    .pipe(uglify({compress: true}))
-    .pipe(gulp.dest('app/backend/public/js/'));
-});*/
+  base = process.env.NODE_ENV !== 'production' ? base :
+    base.pipe(uglify({compress: true}))
+  return base
+    .pipe(gulp.dest(output))
+}
 
-gulp.task('fonts', function () {
+gulp.task('html', () => {
+  return gulp.src('./app/frontend/index.html')
+    .pipe(minifyHTML())
+    .pipe(gulp.dest('./app/backend/public/'))
+})
+
+gulp.task('stylus', () => {
+  return gulp.src('./app/frontend/styles/*.styl')
+    .pipe(stylus({
+      compress: true,
+      use: [nib()]
+    }))
+    .pipe(gulp.dest('./app/backend/public/'))
+})
+
+gulp.task('js', () => {
+	return browserifyOrigin('./app/frontend/js/index.js', 'bundle.js', './app/backend/public/')
+})
+
+gulp.task('fonts', () => {
 	return gulp.src('app/frontend/fonts/*')
-		.pipe(gulp.dest('app/backend/public/fonts'));
-});
+		.pipe(gulp.dest('app/backend/public/fonts'))
+})
 
-gulp.task('images', function () {
+gulp.task('images', () => {
 	return gulp.src('app/frontend/img/**/*')
-		.pipe(gulp.dest('app/backend/public/img'));
-});
+		.pipe(gulp.dest('app/backend/public/img'))
+})
 
-gulp.task('watch', function () {
-	gulp.watch('app/frontend/index.html', ['html']);
-	gulp.watch('app/frontend/components/**/*.html', ['components']);
-	gulp.watch('app/frontend/stylus/**/*.styl', ['build']);
-	//gulp.watch('app/frontend/js/**/*.js', ['js']);
-});
+gulp.task('watch', () => {
+	gulp.watch('app/frontend/index.html', ['html'])
+	gulp.watch('app/frontend/js/**/*.js', ['js'])
+})
 
-gulp.task('default', ['build', 'fonts', 'images', 'watch']);
+gulp.task('default', ['html', 'fonts', 'images', 'stylus', 'js', 'watch'])
+
