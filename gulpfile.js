@@ -52,8 +52,10 @@ gulp.task('images', () => {
 })
 
 gulp.task('watch', () => {
-	gulp.watch('app/frontend/index.html', ['html'])
-	gulp.watch('app/frontend/js/**/*.js', ['js'])
+  if (process.env.NODE_ENV !== 'production') {
+	  gulp.watch('app/frontend/index.html', ['html'])
+	  gulp.watch('app/frontend/js/**/*.js', ['js'])
+  }
 })
 
 gulp.task('default', ['html', 'fonts', 'images', 'stylus', 'js', 'watch'])

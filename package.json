@@ -5,11 +5,11 @@
   "main": "app/server.js",
   "scripts": {
     "gulp": "gulp",
-    "start": "forever -c babel-node app/backend/server.js",
+    "start": "NODE_ENV=production yarn run pro",
     "up": "nodemon --exec babel-node app/backend/server.js --watch app/backend/ --ignore app/backend/public/",
     "sync": "browser-sync start --proxy localhost:5000 --port 3000 --files ./app/backend/public/",
     "push": "git push origin master && git push heroku master",
-    "pro": "NODE_ENV=pro npm run up"
+    "pro": "yarn run gulp && forever -c babel-node app/backend/server.js"
   },
   "repository": {
     "type": "git",
