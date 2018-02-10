@@ -6,7 +6,7 @@ import errorMsg from '../../errors.js'
 export default class home {
   constructor (rex) {
     rex.get('/api/posts', this.get)
-    rex.get('/api/posts/:title', this.getOne)
+    rex.get('/api/posts/:slug', this.getOne)
     rex.post('/api/posts', 'auth', this.post)
     rex.put('/api/posts', 'auth', this.put)
     rex.delete('/api/posts', 'auth', this.delete)
@@ -19,8 +19,8 @@ export default class home {
   }
 
   getOne (req, res) {
-    model.getOne(req.params.title)
-      .then((article) => res.json({err: false, article}))
+    model.getOne(req.params.slug)
+      .then((post) => res.json({err: false, post}))
       .catch(util.error(res, errorMsg.blog.getOne))
   }
 

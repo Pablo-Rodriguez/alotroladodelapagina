@@ -13,7 +13,7 @@ export default (state, emit) => {
     emit(blog.LOAD_POSTS)
     posts = 'Cargando...'
   } else {
-    posts = posts.map(props => post(props, emit))
+    posts = posts.map(props => post({...props, link: `/post/${props.slug}`}, emit))
   }
   return html`
     <div>

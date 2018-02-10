@@ -26,8 +26,15 @@ export const bookStyle = css`
   border-radius: 5px;
   overflow: hidden;
   margin-bottom: 1em;
-  > img {
-    width: 100%;
+  > figure {
+    margin: 0;
+    padding: 0;
+    img {
+      width: 100%;
+      height: 100%;
+      vertical-align: top;
+      font-size: 0px;
+    }
   }
   > div {
     flex: 1;
@@ -54,7 +61,7 @@ export const bookStyle = css`
 
   ${phablet} {
     display: flex;
-    > img {
+    > figure {
       width: 150px;
       height: auto;
       flex-grow: 0;

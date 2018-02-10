@@ -5,7 +5,7 @@ import {goodreads} from '../../stores/types'
 import {default as style, bookStyle} from './style'
 import stars from '../aolp-stars/aolp-stars'
 
-const max = 300
+const max = 250
 
 const Book = (props) => {
   let review = props.review || ''
@@ -14,7 +14,9 @@ const Book = (props) => {
   review = review.length > max ? review.slice(0, max) + '...' : review
   return html`
     <article class=${bookStyle}>
-      <img src="${props.image}" alt="${props.title}" title="${props.title}"/>
+      <figure>
+        <img src="${props.image}" alt="${props.title}" title="${props.title}"/>
+      </figure>
       <div>
         <hgroup>
           <h4><a href="${props.link}">${props.title}</a></h4><span>by</span><h5>${props.author}</h5>

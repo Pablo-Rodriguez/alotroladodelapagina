@@ -3,6 +3,7 @@ import {css} from 'emotion'
 
 import g from '../../css-variables'
 import {desktop} from '../../media-queries'
+import stars from '../aolp-stars/style'
 
 export default css`
   display: block;
@@ -144,6 +145,10 @@ export default css`
   }
   .word-break {
     word-break: break-all;
+  }
+
+  .${stars} {
+    display: inline-block;
   }
 
   ${desktop} {

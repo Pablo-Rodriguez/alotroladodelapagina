@@ -7,7 +7,6 @@ import mongoose from 'mongoose'
 import middlewares from './middlewares'
 import controllers from './controllers'
 import fallback from 'express-history-api-fallback'
-
 import config from './config'
 
 const root = join(__dirname, 'public')

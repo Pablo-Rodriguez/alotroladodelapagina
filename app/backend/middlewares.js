@@ -3,6 +3,7 @@ import {join} from 'path'
 
 import express from 'express'
 import morgan from 'morgan'
+import favicon from 'serve-favicon'
 import bodyParser from 'body-parser'
 import methodOverride from 'method-override'
 import cookieParser from 'cookie-parser'
@@ -18,6 +19,7 @@ passportConfig(passport)
 
 export default function (rex) {
   rex.load('morgan', morgan('dev'))
+  rex.load('favicon', favicon(join(__dirname, 'public', 'img', 'icon.png')))
   rex.load('body-parser-urlencoded', bodyParser.urlencoded({extended: false}))
   rex.load('body-parser-json', bodyParser.json())
   rex.load('method-override', methodOverride('_method'))
@@ -34,6 +36,7 @@ export default function (rex) {
   rex.load('static', express.static(root))
 
   rex.use('morgan')
+  rex.use('favicon')
   rex.use('body-parser-urlencoded')
   rex.use('body-parser-json')
   rex.use('method-override')

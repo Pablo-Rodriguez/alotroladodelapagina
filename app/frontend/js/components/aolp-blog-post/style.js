@@ -18,11 +18,11 @@ export default css`
     padding: 2em 2em 1em 2em;
     align-items: center;
     > h2 {
-      cursor: pointer;
       color: ${g['dark--color']};
       font-size: 30px;
       text-align: justify;
-      &:hover {
+      a:hover {
+        cursor: pointer;
         color: ${g['secondary-color']};
       }
     }

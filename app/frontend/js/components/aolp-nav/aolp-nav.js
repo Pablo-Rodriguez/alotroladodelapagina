@@ -5,9 +5,9 @@ import style from './style'
 
 const links = [{
   text: 'Blog',
-  route: '/'
+  route: '/?p=0&tag='
 }, {
-  text: 'Sobre mí',
+  text: 'About',
   route: '/about'
 }]
 
@@ -17,7 +17,7 @@ export default (state, emit) => {
   return html`
     <nav class=${style}>
       ${links.map(link => html`
-        <a href="${link.route}" class="${route === link.route ? 'selected' : ''}">
+        <a href="${link.route}" class="${route === link.route.split('?')[0] ? 'selected' : ''}">
           <span>${link.text}</span>
         </a>
       `)}

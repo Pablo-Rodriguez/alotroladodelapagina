@@ -9,9 +9,13 @@ export default (state) => {
     },
     blog: {
       posts: null,
+      post: null,
       page: safe(() => Number(query.p), 0) || 0,
       more: false,
-      tag: query.tag || ''
+      tag: decodeURIComponent(query.tag || '') || '',
+      disqus: {
+        init: false
+      }
     }
   }
 }
