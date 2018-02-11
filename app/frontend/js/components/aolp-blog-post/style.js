@@ -2,6 +2,7 @@
 import {css} from 'emotion'
 
 import g from '../../css-variables'
+import {tablet} from '../../media-queries'
 
 export default css`
   display: block;
@@ -20,7 +21,7 @@ export default css`
     > h2 {
       color: ${g['dark--color']};
       font-size: 30px;
-      text-align: justify;
+      text-align: left;
       a:hover {
         cursor: pointer;
         color: ${g['secondary-color']};
@@ -36,6 +37,14 @@ export default css`
   > footer {
     display: block;
     padding: 1em;
+  }
+
+  ${tablet} {
+    > header {
+      > h2 {
+        text-align: justify;
+      }
+    }
   }
 `
 
